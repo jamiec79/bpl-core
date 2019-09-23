@@ -7,7 +7,6 @@
         "block": {
             "version": 0,
             "acceptExpiredTransactionTimestamps": false,
-            "idFullSha256": true,
             "maxTransactions": 150,
             "maxPayload": 6300000
         },

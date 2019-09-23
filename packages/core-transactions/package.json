@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-transactions",
-    "version": "2.5.14",
+    "version": "2.5.25",
     "description": "Transaction Services for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -19,9 +19,9 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
-        "@blockpool-io/core-event-emitter": "^2.5.14",
-        "@blockpool-io/core-interfaces": "^2.5.14",
-        "@blockpool-io/crypto": "^2.5.14",
+        "@blockpool-io/core-event-emitter": "^2.5.25",
+        "@blockpool-io/core-interfaces": "^2.5.25",
+        "@blockpool-io/crypto": "^2.5.25",
         "bs58check": "^2.1.2"
     },
     "engines": {

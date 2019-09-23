@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-interfaces",
-    "version": "2.5.14",
+    "version": "2.5.25",
     "description": "Interface types for essential Blockpool Core modules",
     "license": "MIT",
     "contributors": [
@@ -23,7 +23,7 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@blockpool-io/crypto": "^2.5.14",
+        "@blockpool-io/crypto": "^2.5.25",
         "awilix": "^4.2.2",
         "dayjs": "^1.8.15"
     },

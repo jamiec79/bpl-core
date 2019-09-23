@@ -63,6 +63,11 @@ export const index: object = {
                 .integer()
                 .min(0),
         },
+        // Main delegates query needs to be able to return all active delegates
+        limit: Joi.number()
+            .integer()
+            .min(1)
+            .max(201),
     },
 };
 

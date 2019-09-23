@@ -2,7 +2,7 @@ import { app } from "@blockpool-io/core-container";
 import { Logger } from "@blockpool-io/core-interfaces";
 import sqlite3 from "better-sqlite3";
 import delay from "delay";
-import { existsSync, unlinkSync } from "fs";
+import { ensureFileSync, existsSync, unlinkSync } from "fs-extra";
 import pluralize from "pluralize";
 import SocketCluster from "socketcluster";
 import { getHeaders } from "./utils/get-headers";
@@ -22,6 +22,8 @@ class PayloadProcessor {
         if (existsSync(this.payloadDatabasePath)) {
             unlinkSync(this.payloadDatabasePath);
         }
+
+        ensureFileSync(this.payloadDatabasePath);
 
         this.payloadDatabase = new sqlite3(this.payloadDatabasePath);
         this.payloadDatabase.exec(`

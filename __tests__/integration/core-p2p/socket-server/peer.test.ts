@@ -17,7 +17,9 @@ Managers.configManager.setFromPreset("unitnet");
 
 let server: SocketCluster;
 let socket;
+let connect;
 let emit;
+let send;
 
 const headers = {
     version: "2.1.0",
@@ -32,18 +34,25 @@ beforeAll(async () => {
 
     const { service, processor } = createPeerService();
 
-    server = await startSocketServer(service, { server: { port: 4007 } });
+    server = await startSocketServer(service, { server: { port: 4007, workers: 1 } });
     await delay(1000);
 
     socket = socketCluster.create({
         port: 4007,
         hostname: "127.0.0.1",
     });
+    socket.on("error", () => {
+        //
+    });
+
+    connect = () => socket.connect();
 
     emit = (event, data) =>
         new Promise((resolve, reject) => {
             socket.emit(event, data, (err, val) => (err ? reject(err) : resolve(val)));
         });
+
+    send = data => socket.send(data);
 
     jest.spyOn(processor, "validateAndAcceptPeer").mockImplementation(jest.fn());
 });
@@ -124,6 +133,41 @@ describe("Peer socket endpoint", () => {
                     }),
                 ).toResolve();
             });
+
+            it("should disconnect the client if it sends an invalid message payload", async () => {
+                await delay(1000);
+
+                expect(socket.state).toBe("open");
+
+                send('{"event": "#handshake", "data": {}, "cid": 1}');
+                await delay(500);
+
+                send("Invalid payload");
+                await delay(1000);
+
+                expect(socket.state).toBe("closed");
+            });
+
+            it("should disconnect the client if it sends too many pongs too quickly", async () => {
+                connect();
+                await delay(1000);
+
+                expect(socket.state).toBe("open");
+
+                send('{"event": "#handshake", "data": {}, "cid": 1}');
+                await delay(500);
+
+                send("#2");
+                await delay(1000);
+
+                expect(socket.state).toBe("open");
+
+                send("#2");
+                send("#2");
+                await delay(1000);
+
+                expect(socket.state).toBe("closed");
+            });
         });
     });
 
@@ -192,6 +236,74 @@ describe("Peer socket endpoint", () => {
                     data: { block },
                 }),
             ).toResolve();
+        });
+
+        it("should close the connection when the event length is > 128", async () => {
+            await delay(1000);
+
+            await expect(
+                emit(
+                    "p2p.peer.eventNameIsTooLongSoShouldCloseTheConnectionWithCode4413AsItTheEventNameExceedsTheMaximumPermittedLengthSizeOf128Characters",
+                    {
+                        headers,
+                    },
+                ),
+            ).rejects.toHaveProperty("name", "BadConnectionError");
+        });
+
+        it("should close the connection when the event does not start with p2p", async () => {
+            await delay(1000);
+
+            await expect(
+                emit("p3p.peer.getStatus", {
+                    headers,
+                }),
+            ).rejects.toHaveProperty("name", "BadConnectionError");
+        });
+
+        it("should close the connection when the version is invalid", async () => {
+            await delay(1000);
+
+            await expect(
+                emit("p2p.invalid.getStatus", {
+                    headers,
+                }),
+            ).rejects.toHaveProperty("name", "BadConnectionError");
+        });
+
+        it("should close the connection if an external connection accesses an internal endpoint", async () => {
+            await delay(1000);
+
+            await expect(
+                emit("p2p.internal.acceptNewPeer", {
+                    headers,
+                }),
+            ).rejects.toHaveProperty("name", "BadConnectionError");
+        });
+
+        it("should close the connection and prevent reconnection if blocked", async () => {
+            await delay(1000);
+
+            await emit("p2p.peer.getPeers", {
+                headers,
+            });
+
+            expect(socket.state).toBe("open");
+
+            for (let i = 0; i < 100; i++) {
+                await expect(
+                    emit("p2p.peer.getPeers", {
+                        headers,
+                    }),
+                ).rejects.toContainAnyEntries([["name", "CoreRateLimitExceededError"], ["name", "BadConnectionError"]]);
+            }
+
+            expect(socket.state).not.toBe("open");
+
+            socket.connect();
+            await delay(1000);
+
+            expect(socket.state).not.toBe("open");
         });
     });
 });

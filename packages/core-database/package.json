@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-database",
-    "version": "2.5.14",
+    "version": "2.5.25",
     "description": "Database Interface for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -23,12 +23,12 @@
     },
     "dependencies": {
         "@arkecosystem/utils": "^0.3.0",
-        "@blockpool-io/core-container": "^2.5.14",
-        "@blockpool-io/core-event-emitter": "^2.5.14",
-        "@blockpool-io/core-interfaces": "^2.5.14",
-        "@blockpool-io/core-transactions": "^2.5.14",
-        "@blockpool-io/core-utils": "^2.5.14",
-        "@blockpool-io/crypto": "^2.5.14",
+        "@blockpool-io/core-container": "^2.5.25",
+        "@blockpool-io/core-event-emitter": "^2.5.25",
+        "@blockpool-io/core-interfaces": "^2.5.25",
+        "@blockpool-io/core-transactions": "^2.5.25",
+        "@blockpool-io/core-utils": "^2.5.25",
+        "@blockpool-io/crypto": "^2.5.25",
         "lodash.clonedeep": "^4.5.0",
         "lodash.compact": "^3.0.1",
         "lodash.snakecase": "^4.1.1",

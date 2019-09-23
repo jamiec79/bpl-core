@@ -1,7 +1,7 @@
 {
     "name": "@blockpool-io/core-explorer",
-    "version": "2.5.14",
-    "description": "Explorer for ARK Core",
+    "version": "2.5.25",
+    "description": "Explorer for Blockpool Core",
     "license": "MIT",
     "contributors": [
         "Brian Faust <brian@ark.io>"
@@ -19,8 +19,8 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.14",
-        "@blockpool-io/core-interfaces": "^2.5.14",
+        "@blockpool-io/core-container": "^2.5.25",
+        "@blockpool-io/core-interfaces": "^2.5.25",
         "connect-history-api-fallback": "^1.6.0",
         "express": "^4.17.1"
     },

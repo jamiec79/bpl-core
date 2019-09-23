@@ -1,7 +1,7 @@
 {
     "name": "@blockpool-io/core-logger-signale",
-    "version": "2.5.14",
-    "description": "Signale integration for ARK Core",
+    "version": "2.5.25",
+    "description": "Signale integration for Blockpool Core",
     "license": "MIT",
     "contributors": [
         "Brian Faust <brian@ark.io>"
@@ -19,8 +19,8 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
-        "@blockpool-io/core-interfaces": "^2.5.14",
-        "@blockpool-io/core-logger": "^2.5.14",
+        "@blockpool-io/core-interfaces": "^2.5.25",
+        "@blockpool-io/core-logger": "^2.5.25",
         "signale": "^1.4.0"
     },
     "devDependencies": {

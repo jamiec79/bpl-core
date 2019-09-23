@@ -1,7 +1,7 @@
 {
     "name": "@blockpool-io/core-error-tracker-rollbar",
-    "version": "2.5.14",
-    "description": "Rollbar error tracker integration for ARK Core.",
+    "version": "2.5.25",
+    "description": "Rollbar error tracker integration for Blockpool Core.",
     "license": "MIT",
     "contributors": [
         "Brian Faust <brian@ark.io>"
@@ -18,7 +18,7 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.14",
+        "@blockpool-io/core-container": "^2.5.25",
         "rollbar": "^2.8.1"
     },
     "engines": {

@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-jest-matchers",
-    "version": "2.5.14",
+    "version": "2.5.25",
     "description": "Jest matchers for ARK Core",
     "license": "MIT",
     "contributors": [
@@ -21,8 +21,8 @@
     },
     "dependencies": {
         "@arkecosystem/utils": "^0.3.0",
-        "@blockpool-io/core-container": "^2.5.14",
-        "@blockpool-io/crypto": "^2.5.14",
+        "@blockpool-io/core-container": "^2.5.25",
+        "@blockpool-io/crypto": "^2.5.25",
         "bip39": "^3.0.2",
         "got": "^9.6.0",
         "jest-extended": "^0.11.2",

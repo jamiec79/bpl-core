@@ -1,7 +1,7 @@
 {
     "name": "@blockpool-io/core-tester-cli",
-    "version": "2.5.14",
-    "description": "Tester CLI for ARK Core",
+    "version": "2.5.25",
+    "description": "Tester CLI for Blockpool Core",
     "license": "MIT",
     "contributors": [
         "Brian Faust <brian@ark.io>",
@@ -28,9 +28,9 @@
         "tester": "./bin/run"
     },
     "dependencies": {
-        "@blockpool-io/core-forger": "^2.5.14",
-        "@blockpool-io/core-utils": "^2.5.14",
-        "@blockpool-io/crypto": "^2.5.14",
+        "@blockpool-io/core-forger": "^2.5.25",
+        "@blockpool-io/core-utils": "^2.5.25",
+        "@blockpool-io/crypto": "^2.5.25",
         "@oclif/command": "^1.5.16",
         "@oclif/config": "^1.13.2",
         "@oclif/plugin-help": "^2.2.0",

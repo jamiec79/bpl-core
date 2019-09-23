@@ -1,7 +1,7 @@
 {
     "name": "@blockpool-io/core-logger-winston",
-    "version": "2.5.14",
-    "description": "Winston Logger for ARK Core",
+    "version": "2.5.25",
+    "description": "Winston Logger for Blockpool Core",
     "license": "MIT",
     "contributors": [
         "François-Xavier Thoorens <fx@ark.io>",
@@ -20,8 +20,8 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
-        "@blockpool-io/core-interfaces": "^2.5.14",
-        "@blockpool-io/core-logger": "^2.5.14",
+        "@blockpool-io/core-interfaces": "^2.5.25",
+        "@blockpool-io/core-logger": "^2.5.25",
         "chalk": "^2.4.2",
         "colors": "^1.3.3",
         "dayjs": "^1.8.15",

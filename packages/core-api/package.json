@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-api",
-    "version": "2.5.14",
+    "version": "2.5.25",
     "description": "Public API for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -22,12 +22,12 @@
     },
     "dependencies": {
         "@arkecosystem/utils": "^0.3.0",
-        "@blockpool-io/core-container": "^2.5.14",
-        "@blockpool-io/core-http-utils": "^2.5.14",
-        "@blockpool-io/core-interfaces": "^2.5.14",
-        "@blockpool-io/core-transaction-pool": "^2.5.14",
-        "@blockpool-io/core-utils": "^2.5.14",
-        "@blockpool-io/crypto": "^2.5.14",
+        "@blockpool-io/core-container": "^2.5.25",
+        "@blockpool-io/core-http-utils": "^2.5.25",
+        "@blockpool-io/core-interfaces": "^2.5.25",
+        "@blockpool-io/core-transaction-pool": "^2.5.25",
+        "@blockpool-io/core-utils": "^2.5.25",
+        "@blockpool-io/crypto": "^2.5.25",
         "@hapi/boom": "^7.4.2",
         "@hapi/joi": "^15.1.0",
         "ajv": "^6.10.2",

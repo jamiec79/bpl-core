@@ -26,9 +26,9 @@ export enum SocketErrors {
     WrongEndpoint = "CoreWrongEndpointError",
     AppNotReady = "CoreAppNotReadyError",
     HeadersRequired = "CoreHeadersRequiredError",
-    ForgerNotAuthorized = "CoreForgerNotAuthorizedError",
     Unknown = "CoreUnknownError",
     Validation = "CoreValidationError",
     RateLimitExceeded = "CoreRateLimitExceededError",
     Forbidden = "CoreForbiddenError",
+    InvalidMessagePayload = "CoreInvalidMessagePayloadError",
 }
