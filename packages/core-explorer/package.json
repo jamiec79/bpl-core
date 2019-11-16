@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-explorer",
-    "version": "2.5.25",
+    "version": "2.5.26",
     "description": "Explorer for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -19,8 +19,8 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.25",
-        "@blockpool-io/core-interfaces": "^2.5.25",
+        "@blockpool-io/core-container": "^2.5.26",
+        "@blockpool-io/core-interfaces": "^2.5.26",
         "connect-history-api-fallback": "^1.6.0",
         "express": "^4.17.1"
     },
