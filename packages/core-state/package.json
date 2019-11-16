@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-state",
-    "version": "2.5.25",
+    "version": "2.5.26",
     "description": "State Management for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -21,11 +21,11 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.25",
-        "@blockpool-io/core-interfaces": "^2.5.25",
-        "@blockpool-io/core-transactions": "^2.5.25",
-        "@blockpool-io/core-utils": "^2.5.25",
-        "@blockpool-io/crypto": "^2.5.25",
+        "@blockpool-io/core-container": "^2.5.26",
+        "@blockpool-io/core-interfaces": "^2.5.26",
+        "@blockpool-io/core-transactions": "^2.5.26",
+        "@blockpool-io/core-utils": "^2.5.26",
+        "@blockpool-io/crypto": "^2.5.26",
         "immutable": "^4.0.0-rc.12",
         "lodash.clonedeep": "^4.5.0",
         "pluralize": "^8.0.0"

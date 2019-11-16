@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-vote-report",
-    "version": "2.5.25",
+    "version": "2.5.26",
     "description": "Vote Report for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -18,10 +18,10 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.25",
-        "@blockpool-io/core-http-utils": "^2.5.25",
-        "@blockpool-io/core-utils": "^2.5.25",
-        "@blockpool-io/crypto": "^2.5.25",
+        "@blockpool-io/core-container": "^2.5.26",
+        "@blockpool-io/core-http-utils": "^2.5.26",
+        "@blockpool-io/core-utils": "^2.5.26",
+        "@blockpool-io/crypto": "^2.5.26",
         "handlebars": "^4.1.2",
         "vision": "^5.4.4"
     },

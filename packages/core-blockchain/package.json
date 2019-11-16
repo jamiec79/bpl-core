@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-blockchain",
-    "version": "2.5.25",
+    "version": "2.5.26",
     "description": "Blockchain Manager for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -22,14 +22,14 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.25",
-        "@blockpool-io/core-database": "^2.5.25",
-        "@blockpool-io/core-event-emitter": "^2.5.25",
-        "@blockpool-io/core-interfaces": "^2.5.25",
-        "@blockpool-io/core-state": "^2.5.25",
-        "@blockpool-io/core-transactions": "^2.5.25",
-        "@blockpool-io/core-utils": "^2.5.25",
-        "@blockpool-io/crypto": "^2.5.25",
+        "@blockpool-io/core-container": "^2.5.26",
+        "@blockpool-io/core-database": "^2.5.26",
+        "@blockpool-io/core-event-emitter": "^2.5.26",
+        "@blockpool-io/core-interfaces": "^2.5.26",
+        "@blockpool-io/core-state": "^2.5.26",
+        "@blockpool-io/core-transactions": "^2.5.26",
+        "@blockpool-io/core-utils": "^2.5.26",
+        "@blockpool-io/crypto": "^2.5.26",
         "async": "^3.1.0",
         "delay": "^4.3.0",
         "immutable": "^4.0.0-rc.12",
@@ -39,7 +39,7 @@
         "xstate": "^4.6.7"
     },
     "devDependencies": {
-        "@blockpool-io/core-p2p": "^2.5.25",
+        "@blockpool-io/core-p2p": "^2.5.26",
         "@types/async": "^3.0.0",
         "@types/lodash.get": "^4.4.6",
         "@types/pluralize": "^0.0.29",

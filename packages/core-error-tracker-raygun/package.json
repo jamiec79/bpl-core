@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-error-tracker-raygun",
-    "version": "2.5.25",
+    "version": "2.5.26",
     "description": "Raygun error tracker integration for Blockpool Core.",
     "license": "MIT",
     "contributors": [
@@ -18,7 +18,7 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.25",
+        "@blockpool-io/core-container": "^2.5.26",
         "raygun": "^0.10.1"
     },
     "devDependencies": {

@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-elasticsearch",
-    "version": "2.5.25",
+    "version": "2.5.26",
     "description": "A powerful Elasticsearch integration for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -18,11 +18,11 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.25",
-        "@blockpool-io/core-event-emitter": "^2.5.25",
-        "@blockpool-io/core-http-utils": "^2.5.25",
-        "@blockpool-io/core-interfaces": "^2.5.25",
-        "@blockpool-io/crypto": "^2.5.25",
+        "@blockpool-io/core-container": "^2.5.26",
+        "@blockpool-io/core-event-emitter": "^2.5.26",
+        "@blockpool-io/core-http-utils": "^2.5.26",
+        "@blockpool-io/core-interfaces": "^2.5.26",
+        "@blockpool-io/crypto": "^2.5.26",
         "@elastic/elasticsearch": "^7.2.0",
         "@hapi/boom": "^7.4.2",
         "@hapi/joi": "^15.1.0",

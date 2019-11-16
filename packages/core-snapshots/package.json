@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-snapshots",
-    "version": "2.5.25",
+    "version": "2.5.26",
     "description": "Provides live local streamed snapshots functionality for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -20,11 +20,11 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.25",
-        "@blockpool-io/core-database-postgres": "^2.5.25",
-        "@blockpool-io/core-interfaces": "^2.5.25",
-        "@blockpool-io/core-utils": "^2.5.25",
-        "@blockpool-io/crypto": "^2.5.25",
+        "@blockpool-io/core-container": "^2.5.26",
+        "@blockpool-io/core-database-postgres": "^2.5.26",
+        "@blockpool-io/core-interfaces": "^2.5.26",
+        "@blockpool-io/core-utils": "^2.5.26",
+        "@blockpool-io/crypto": "^2.5.26",
         "JSONStream": "^1.3.5",
         "cpy-cli": "^2.0.0",
         "fs-extra": "^8.1.0",
