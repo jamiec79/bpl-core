@@ -47,12 +47,15 @@ RPM=$(which yum || :)
 # Detect SystemV / SystemD
 SYS=$([[ -L "/sbin/init" ]] && echo 'SystemD' || echo 'SystemV')
 
+# Detect Debian/Ubuntu derivative
+DEB_ID=$( (grep DISTRIB_CODENAME /etc/upstream-release/lsb-release || grep DISTRIB_CODENAME /etc/lsb-release) 2>/dev/null | cut -d'=' -f2 )
+
 if [[ ! -z $DEB ]]; then
-    success "Running install for Debian derivate"
+    success "Running install for Debian derivative"
 elif [[ ! -z $RPM ]]; then
-    success "Running install for RedHat derivate"
+    success "Running install for RedHat derivative"
 else
-    heading "Not supported system"
+    heading "Unsupported system"
     exit 1;
 fi
 
@@ -107,12 +110,13 @@ sudo rm -rf ~/{.npm,.forever,.node*,.cache,.nvm}
 
 if [[ ! -z $DEB ]]; then
     sudo wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -
-    (echo "deb https://deb.nodesource.com/node_11.x $(lsb_release -s -c) main" | sudo tee /etc/apt/sources.list.d/nodesource.list)
+    (echo "deb https://deb.nodesource.com/node_12.x ${DEB_ID} main" | sudo tee /etc/apt/sources.list.d/nodesource.list)
     sudo apt-get update
     sudo apt-get install nodejs -y
+
 elif [[ ! -z $RPM ]]; then
     sudo yum install gcc-c++ make -y
-    curl -sL https://rpm.nodesource.com/setup_11.x | sudo -E bash - > /dev/null 2>&1
+    curl -sL https://rpm.nodesource.com/setup_12.x | sudo -E bash - > /dev/null 2>&1
 fi
 
 success "Installed node.js & npm!"
@@ -145,10 +149,10 @@ success "Installed PM2!"
 heading "Installing program dependencies..."
 
 if [[ ! -z $DEB ]]; then
-    sudo apt-get install build-essential libcairo2-dev pkg-config libtool autoconf automake python libpq-dev jq -y
+    sudo apt-get install build-essential libcairo2-dev pkg-config libtool autoconf automake python libpq-dev jq libjemalloc-dev -y
 elif [[ ! -z $RPM ]]; then
     sudo yum groupinstall "Development Tools" -y -q
-    sudo yum install postgresql-devel jq -y -q
+    sudo yum install postgresql-devel jq jemalloc-devel -y -q
 fi
 
 success "Installed program dependencies!"
@@ -174,7 +178,7 @@ success "Installed PostgreSQL!"
 
 heading "Installing NTP..."
 
-sudo timedatectl set-ntp off > /dev/null 2>&1 # disable the default systemd timesyncd service
+sudo timedatectl set-ntp off > /dev/null 2>&1 || true # disable the default systemd timesyncd service
 
 if [[ ! -z $DEB ]]; then
     sudo apt-get install ntp -yyq
@@ -205,16 +209,26 @@ success "Installed system updates!"
 
 heading "Installing BPL Core..."
 
-while ! yarn global add @blockpool-io/core ; do
+cd ~
+if [ -f bpl-core ]; then
+    mv bpl-core bpl-core-bak
+fi
+rm -rf bpl-core
+git clone https://github.com/blockpool-io/bpl-core
+cd bpl-core
+while ! yarn setup:clean ; do
     read -p "Installing Blockpool Core failed, do you want to retry? [y/N]: " choice
     if [[ ! "$choice" =~ ^(yes|y|Y) ]] ; then
         exit 1
     fi
 done
+cd ..
 
 echo 'export PATH=$(yarn global bin):$PATH' >> ~/.bashrc
 export PATH=$(yarn global bin):$PATH
-bpl config:publish
+ln -s $(pwd)/bpl-core/packages/core/bin/run $(yarn global bin)/bpl || echo "Link already exists."
+
+$(yarn global bin)/bpl config:publish
 
 success "Installed BPL Core!"
 
@@ -243,9 +257,9 @@ if [[ "$choice" =~ ^(yes|y|Y) ]]; then
         read -p "Proceed? [y/N]: " choice
     done
 
-    bpl env:set CORE_DB_USERNAME "${databaseUsername}"
-    bpl env:set CORE_DB_PASSWORD "${databasePassword}"
-    bpl env:set CORE_DB_DATABASE "${databaseName}"
+    $(yarn global bin)/bpl env:set CORE_DB_USERNAME "${databaseUsername}"
+    $(yarn global bin)/bpl env:set CORE_DB_PASSWORD "${databasePassword}"
+    $(yarn global bin)/bpl env:set CORE_DB_DATABASE "${databaseName}"
 
     userExists=$(sudo -i -u postgres psql -tAc "SELECT 1 FROM pg_user WHERE usename = '${databaseUsername}'")
     databaseExists=$(sudo -i -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname = '${databaseName}'")

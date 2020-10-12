@@ -1,14 +1,16 @@
 import { app } from "@blockpool-io/core-container";
 import { Database, State } from "@blockpool-io/core-interfaces";
+import { Utils } from "@blockpool-io/crypto";
 import delay from "delay";
 import { defaults } from "../../../../packages/core-api/src/defaults";
 import { plugin } from "../../../../packages/core-api/src/plugin";
+import { defaults as defaultsPeer } from "../../../../packages/core-p2p/src/defaults";
 import { registerWithContainer, setUpContainer } from "../../../utils/helpers/container";
 
 import { delegates } from "../../../utils/fixtures";
 import { generateRound } from "./utils/generate-round";
 
-import { sortBy } from "@arkecosystem/utils";
+import { sortBy } from "@blockpool-io/utils";
 import { asValue } from "awilix";
 
 const round = generateRound(delegates.map(delegate => delegate.publicKey), 1);
@@ -35,6 +37,8 @@ const setUp = async () => {
         ],
     });
 
+    app.register("pkg.p2p.opts", asValue(defaultsPeer));
+
     const databaseService = app.resolvePlugin<Database.IDatabaseService>("database");
     await databaseService.buildWallets();
     await databaseService.saveRound(round);
@@ -55,16 +59,18 @@ const calculateRanks = async () => {
     const databaseService = app.resolvePlugin<Database.IDatabaseService>("database");
 
     const delegateWallets = Object.values(databaseService.walletManager.allByUsername()).sort(
-        (a: State.IWallet, b: State.IWallet) => b.voteBalance.comparedTo(a.voteBalance),
+        (a: State.IWallet, b: State.IWallet) =>
+            b
+                .getAttribute<Utils.BigNumber>("delegate.voteBalance")
+                .comparedTo(a.getAttribute<Utils.BigNumber>("delegate.voteBalance")),
     );
 
-    // tslint:disable-next-line: ban
-    sortBy(delegateWallets, "publicKey").forEach((delegate, i) => {
+    for (const delegate of sortBy(delegateWallets, "publicKey")) {
         const wallet = databaseService.walletManager.findByPublicKey(delegate.publicKey);
-        (wallet as any).rate = i + 1;
+        wallet.setAttribute("delegate.rank", delegateWallets.indexOf(delegate) + 1);
 
         databaseService.walletManager.reindex(wallet);
-    });
+    }
 };
 
 export { calculateRanks, setUp, tearDown };

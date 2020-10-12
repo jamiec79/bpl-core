@@ -1,7 +1,15 @@
 module.exports = {
     "@blockpool-io/core-event-emitter": {},
     "@blockpool-io/core-logger-pino": {},
+    "@blockpool-io/core-p2p": {
+        server: {
+            port: process.env.CORE_P2P_PORT || 4000,
+        },
+        minimumVersions: [">=2.0.0"],
+        minimumNetworkReach: 5,
+    },
     "@blockpool-io/core-state": {},
+    "@blockpool-io/core-magistrate-transactions":{},
     "@blockpool-io/core-database-postgres": {
         connection: {
             host: process.env.CORE_DB_HOST || "localhost",
@@ -19,13 +27,6 @@ module.exports = {
             minFeePool: 1000,
             minFeeBroadcast: 1000,
         },
-    },
-    "@blockpool-io/core-p2p": {
-        server: {
-            port: process.env.CORE_P2P_PORT || 4000,
-        },
-        minimumVersions: [">=2.0.0"],
-        minimumNetworkReach: 5,
     },
     "@blockpool-io/core-blockchain": {},
     "@blockpool-io/core-api": {

@@ -5,6 +5,7 @@ import { Managers } from "@blockpool-io/crypto";
 import nock from "nock";
 import { TransferCommand } from "../../../../../packages/core-tester-cli/src/commands/send/transfer";
 import { bplToSatoshi, captureTransactions, expectTransactions, toFlags } from "../../shared";
+import { nodeStatusResponse } from "./fixtures";
 
 beforeEach(() => {
     // Just passthru. We'll test the Command class logic in its own test file more thoroughly
@@ -18,6 +19,11 @@ beforeEach(() => {
         .twice()
         .reply(200, { data: Managers.configManager.getPreset("unitnet") });
 
+    nock("http://localhost:4003")
+        .get("/api/node/status")
+        .twice()
+        .reply(200, nodeStatusResponse);
+
     jest.spyOn(httpie, "post");
 });
 
@@ -27,7 +33,7 @@ afterEach(() => {
 
 describe("Commands - Transfer", () => {
     it("should postTransactions using custom smartBridge value", async () => {
-        const expectedRecipientId = "DFyUhQW52sNB5PZdS7VD9HknwYrSNHPQDq";
+        const expectedRecipientId = "AJWRd23HNEhPLkK1ymMnwnDBX2a7QBZqff";
         const expectedTransactionAmount = 2;
         const expectedFee = 0.1;
         const opts = {
@@ -53,7 +59,7 @@ describe("Commands - Transfer", () => {
 
     it("should generate n transactions", async () => {
         const expectedTxCount = 5;
-        const expectedRecipientId = "DFyUhQW52sNB5PZdS7VD9HknwYrSNHPQDq";
+        const expectedRecipientId = "AJWRd23HNEhPLkK1ymMnwnDBX2a7QBZqff";
         const opts = {
             amount: 2,
             transferFee: 2,
@@ -76,7 +82,7 @@ describe("Commands - Transfer", () => {
 
     it("should send n transactions to specified recipient", async () => {
         const expectedTxCount = 10;
-        const expectedRecipientId = "DFyUhQW52sNB5PZdS7VD9HknwYrSNHPQDq";
+        const expectedRecipientId = "AJWRd23HNEhPLkK1ymMnwnDBX2a7QBZqff";
         const opts = {
             amount: 2,
             transferFee: 0.1,
@@ -98,7 +104,7 @@ describe("Commands - Transfer", () => {
     it("should sign with 2nd passphrase if specified", async () => {
         const expectedTransactionAmount = 2;
         const expectedFee = 0.1;
-        const expectedRecipientId = "DFyUhQW52sNB5PZdS7VD9HknwYrSNHPQDq";
+        const expectedRecipientId = "AJWRd23HNEhPLkK1ymMnwnDBX2a7QBZqff";
 
         const opts = {
             amount: expectedTransactionAmount,

@@ -1,20 +1,19 @@
 import { app } from "@blockpool-io/core-container";
 import { Blockchain, Database, State } from "@blockpool-io/core-interfaces";
 import { formatTimestamp } from "@blockpool-io/core-utils";
-import { Utils } from "@blockpool-io/crypto";
+import { Interfaces, Utils } from "@blockpool-io/crypto";
 
 export const transformBlock = (model, transform) => {
     if (!transform) {
         model.reward = Utils.BigNumber.make(model.reward).toFixed();
         model.totalFee = Utils.BigNumber.make(model.totalFee).toFixed();
         model.totalAmount = Utils.BigNumber.make(model.totalAmount).toFixed();
-
         return model;
     }
 
     const databaseService: Database.IDatabaseService = app.resolvePlugin<Database.IDatabaseService>("database");
     const generator: State.IWallet = databaseService.walletManager.findByPublicKey(model.generatorPublicKey);
-    const lastBlock = app.resolvePlugin<Blockchain.IBlockchain>("blockchain").getLastBlock();
+    const lastBlock: Interfaces.IBlock = app.resolvePlugin<Blockchain.IBlockchain>("blockchain").getLastBlock();
 
     model.reward = Utils.BigNumber.make(model.reward);
     model.totalFee = Utils.BigNumber.make(model.totalFee);
@@ -35,7 +34,7 @@ export const transformBlock = (model, transform) => {
             length: model.payloadLength,
         },
         generator: {
-            username: generator.username,
+            username: generator.getAttribute("delegate.username"),
             address: generator.address,
             publicKey: generator.publicKey,
         },

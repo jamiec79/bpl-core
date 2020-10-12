@@ -1,10 +1,20 @@
 import { app } from "@blockpool-io/core-container";
 import { Blockchain, Database, EventEmitter, Logger, P2P, TransactionPool } from "@blockpool-io/core-interfaces";
-import { roundCalculator } from "@blockpool-io/core-utils";
+import { isWhitelisted, roundCalculator } from "@blockpool-io/core-utils";
 import { Crypto } from "@blockpool-io/crypto";
+import { process } from "ipaddr.js";
 
 export const acceptNewPeer = async ({ service, req }: { service: P2P.IPeerService; req }): Promise<void> => {
     await service.getProcessor().validateAndAcceptPeer({ ip: req.data.ip });
+};
+
+export const isPeerOrForger = ({ service, req }: { service: P2P.IPeerService; req }): { isPeerOrForger: boolean } => {
+    const sanitizedIp = process(req.data.ip).toString();
+    return {
+        isPeerOrForger:
+            service.getStorage().hasPeer(sanitizedIp) ||
+            isWhitelisted(app.resolveOptions("p2p").remoteAccess, sanitizedIp),
+    };
 };
 
 export const emitEvent = ({ req }): void => {
@@ -21,7 +31,7 @@ export const getUnconfirmedTransactions = async (): Promise<P2P.IUnconfirmedTran
 
     return {
         transactions: await transactionPool.getTransactionsForForging(maxTransactions),
-        poolSize: transactionPool.getPoolSize(),
+        poolSize: await transactionPool.getPoolSize(),
     };
 };
 
@@ -60,8 +70,34 @@ export const getNetworkState = async ({ service }: { service: P2P.IPeerService }
     return service.getMonitor().getNetworkState();
 };
 
+export const getRateLimitStatus = async ({
+    service,
+    req,
+}: {
+    service: P2P.IPeerService;
+    req: { data: { ip: string; endpoint?: string } };
+}): Promise<P2P.IRateLimitStatus> => {
+    return service.getMonitor().getRateLimitStatus(req.data.ip, req.data.endpoint);
+};
+
+export const isBlockedByRateLimit = async ({
+    service,
+    req,
+}: {
+    service: P2P.IPeerService;
+    req: { data: { ip: string } };
+}): Promise<{ blocked: boolean }> => {
+    return {
+        blocked: await service.getMonitor().isBlockedByRateLimit(req.data.ip),
+    };
+};
+
 export const syncBlockchain = (): void => {
     app.resolvePlugin<Logger.ILogger>("logger").debug("Blockchain sync check WAKEUP requested by forger");
 
     app.resolvePlugin<Blockchain.IBlockchain>("blockchain").forceWakeup();
+};
+
+export const getRateLimitedEndpoints = ({ service }: { service: P2P.IPeerService }): string[] => {
+    return service.getMonitor().getRateLimitedEndpoints();
 };

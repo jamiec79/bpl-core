@@ -9,7 +9,7 @@ const exec = util.promisify(require("child_process").exec);
  * @return {void}
  */
 module.exports = async options => {
-    const commandStopNode = `docker ps --format "{{.Names}}" | grep node1_ark | xargs -I {} sh -c 'docker exec -d {} bash killpid.sh'`; // sending SIGINT for graceful shutdown
+    const commandStopNode = `docker ps --format "{{.Names}}" | grep node1_bpl | xargs -I {} sh -c 'docker exec -d {} bash killpid.sh'`; // sending SIGINT for graceful shutdown
     const { stdout, stderr } = await exec(commandStopNode);
     console.log(`[pool-clear] killed node1 process`);
 };

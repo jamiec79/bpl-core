@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-api",
-    "version": "2.5.25",
+    "version": "2.6.57",
     "description": "Public API for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -21,32 +21,29 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@arkecosystem/utils": "^0.3.0",
-        "@blockpool-io/core-container": "^2.5.25",
-        "@blockpool-io/core-http-utils": "^2.5.25",
-        "@blockpool-io/core-interfaces": "^2.5.25",
-        "@blockpool-io/core-transaction-pool": "^2.5.25",
-        "@blockpool-io/core-utils": "^2.5.25",
-        "@blockpool-io/crypto": "^2.5.25",
-        "@hapi/boom": "^7.4.2",
+        "@blockpool-io/core-container": "^2.6.57",
+        "@blockpool-io/core-http-utils": "^2.6.57",
+        "@blockpool-io/core-interfaces": "^2.6.57",
+        "@blockpool-io/core-transaction-pool": "^2.6.57",
+        "@blockpool-io/core-transactions": "^2.6.57",
+        "@blockpool-io/core-utils": "^2.6.57",
+        "@blockpool-io/crypto": "^2.6.57",
+        "@arkecosystem/utils": "^1.2",
+        "@hapi/boom": "^8.0.0",
         "@hapi/joi": "^15.1.0",
         "ajv": "^6.10.2",
-        "bs58check": "^2.1.2",
         "dayjs": "^1.8.15",
-        "hapi-pagination": "https://github.com/faustbrian/hapi-pagination#f4991348ca779b68b8e7139cfcbc601e6d496612",
         "hapi-rate-limit": "^4.0.0",
         "ip": "^1.1.5",
-        "lodash.groupby": "^4.6.0",
         "lodash.orderby": "^4.6.0",
         "lodash.partition": "^4.6.0",
         "lodash.snakecase": "^4.1.1",
-        "semver": "^6.2.0"
+        "semver": "^7.0.0"
     },
     "devDependencies": {
         "@types/hapi__boom": "^7.4.0",
         "@types/hapi__joi": "^15.0.2",
         "@types/ip": "^1.1.0",
-        "@types/lodash.groupby": "^4.6.6",
         "@types/lodash.orderby": "^4.6.6",
         "@types/lodash.partition": "^4.6.6",
         "@types/lodash.snakecase": "^4.1.6",
@@ -57,6 +54,5 @@
     },
     "publishConfig": {
         "access": "public"
-    },
-    "gitHead": "1eb2e9238d9d18aa1c79514c88bf85e524b68256"
+    }
 }

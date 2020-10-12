@@ -1,9 +1,10 @@
 "use strict";
 
-const { Managers, Transactions } = require("@blockpool-io/crypto");
+const { Managers, Utils } = require("@blockpool-io/crypto");
 const utils = require("./utils");
 const { delegates } = require("../../../../lib/utils/testnet");
 const testUtils = require("../../../../lib/utils/test-utils");
+const { TransactionFactory } = require('../../../../../helpers/transaction-factory');
 
 /**
  * Creates a transaction to a new wallet
@@ -13,36 +14,37 @@ const testUtils = require("../../../../lib/utils/test-utils");
 module.exports = async options => {
     Managers.configManager.setFromPreset("testnet");
 
+    const senderWallet = delegates[3]; // better use a different delegate for each scenario initial transfer
+    let nonce = Utils.BigNumber.make(1);
     const transactions = [];
-    Object.keys(utils.walletsMix).forEach(firstTxType => {
+    for (const firstTxType of Object.keys(utils.walletsMix)) {
         const secondTxsTypes = utils.walletsMix[firstTxType];
 
-        Object.keys(secondTxsTypes).forEach(secondTxType => {
+        for (const secondTxType of Object.keys(secondTxsTypes)) {
             const wallets = secondTxsTypes[secondTxType];
             const transferAmount = _balanceNeededFromTxMix(firstTxType, secondTxType);
             transactions.push(
-                Transactions.BuilderFactory.transfer()
-                    .amount(transferAmount)
-                    .recipientId(wallets[0].address)
-                    .vendorField(`init double spend ${firstTxType} - ${secondTxType}`)
-                    .fee(0.1 * Math.pow(10, 8))
-                    .sign(delegates[0].passphrase)
-                    .getStruct(),
-                Transactions.BuilderFactory.transfer()
-                    .amount(utils.fees.secondSignRegistration + transferAmount)
-                    .recipientId(wallets[2].address)
-                    .vendorField(`init double spend ${firstTxType} - ${secondTxType}`)
-                    .fee(0.1 * Math.pow(10, 8))
-                    .sign(delegates[0].passphrase)
-                    .getStruct(),
+                TransactionFactory.transfer(wallets[0].address, transferAmount, `init double spend ${firstTxType} - ${secondTxType}`)
+                    .withFee(0.1 * Math.pow(10, 8))
+                    .withPassphrase(senderWallet.passphrase)
+                    .withNonce(nonce.plus(1))
+                    .createOne(),
+
+                TransactionFactory.transfer(wallets[2].address, utils.fees.secondSignRegistration + transferAmount, `init double spend ${firstTxType} - ${secondTxType}`)
+                    .withFee(0.1 * Math.pow(10, 8))
+                    .withPassphrase(senderWallet.passphrase)
+                    .withNonce(nonce.plus(2))
+                    .createOne(),
             );
-        });
-    });
+
+            nonce = nonce.plus(2);
+        }
+    }
 
     await testUtils.POST("transactions", { transactions });
 
     function _balanceNeededFromTxMix(txType1, txType2) {
-        // we want to have 1 arkstoshi less than the amount needed for the 2 transactions
+        // we want to have 1 bplstoshi less than the amount needed for the 2 transactions
         return utils.amountNeeded[txType1] + utils.amountNeeded[txType2] - 1;
     }
 };

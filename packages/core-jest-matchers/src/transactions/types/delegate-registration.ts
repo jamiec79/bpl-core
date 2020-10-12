@@ -1,6 +1,6 @@
 import { Enums } from "@blockpool-io/crypto";
 
-const { DelegateRegistration } = Enums.TransactionTypes;
+const { DelegateRegistration } = Enums.TransactionType;
 
 export {};
 

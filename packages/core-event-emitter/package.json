@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-event-emitter",
-    "version": "2.5.25",
+    "version": "2.6.57",
     "description": "Event Manager for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -22,6 +22,5 @@
     },
     "publishConfig": {
         "access": "public"
-    },
-    "gitHead": "7282f6682bd76a1666e1ddf7673c1942fc3a2c3d"
+    }
 }

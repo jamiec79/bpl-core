@@ -119,6 +119,7 @@ const fees = {
     vote: 1 * bpltoshi,
     secondSignRegistration: 5 * bpltoshi,
     delegateRegistration: 25 * bpltoshi,
+    ipfs: 5 * bpltoshi,
 };
 
 module.exports = {

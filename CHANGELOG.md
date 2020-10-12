@@ -7,6 +7,409 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.6.57] - 2020-09-17
+
+### Fixed
+
+-   Only verify peer blocks < our height (c968e69d, @air1one)
+-   Stricter multipayment tx check (620027df, @air1one)
+-   Initialize maxPayload on connection create (3ac3eb17, @air1one)
+
+## [2.6.54] - 2020-09-09
+
+### Changed
+
+-   Verify peer claimed state (24a8b044, @air1one)
+
+### Fixed
+
+-   Use head from utils (da13465e, @air1one)
+
+## [2.6.52] - 2020-08-11
+
+### Fixed
+
+-   Discard zero-padded R/S (#3950) (9f197fa1, @air1one)
+-   Check sig length value vs r/s length (#3950) (c2d3f2e5, @air1one)
+-   Find by address / public key before username (#3950) (ddd19cc2, @air1one)
+
+## [2.6.49] - 2020-07-22
+
+### Fixed
+
+-   Use bundled file for `browser` field (#3904) (20d66cf3, @luciorubeens)
+-   Reduce download block size when getting no block (#3905) (e2232875, @air1one)
+-   Ping ports using head (#3905) (db226bd3, @air1one)
+-   Stricter rate limit for getBlocks (#3905) (df7a3aa1, @air1one)
+-   Allow to discard possibly invalid txs from pool (#3905) (0450ee84, @air1one)
+-   Check sig length vs R and S length (#3905) (1b0863c3, @air1one)
+-   Check that R and S is positive (#3905) (0783ec08, @air1one)
+
+## [2.6.42] - 2020-06-29
+
+### Added
+
+-   Add rollup config for browsers ([#3830]) (da0d8d5a, @luciorubeens)
+
+### Changed
+
+-   Update `bcrypto` dependency to v5 ([#3823]) (0b510429, @faustbrian)
+
+### Fixed
+
+-   Use incremental timestamps for `make:block` ([#3818]) (4612cd24, @deanpress)
+
+## [2.6.39] - 2020-06-17
+
+### Fixed
+
+-   Block schema violation ([#3806])
+
+## [2.6.38] - 2020-05-27
+
+### Fixed
+
+-   Discard late-forged blocks from forger ([#3746])
+
+## [2.6.37] - 2020-05-12
+
+### Changed
+
+-   Custom validation for `postBlock` in `core-p2p` worker ([#3695])
+
+## [2.6.36] - 2020-05-04
+
+### Fixed
+
+-   Update vote balance with htlc locked balance on vote transactions ([#3669])
+-   Use sorted array (instead of tree) for storing transactions by fee and nonce ([#3678])
+
+## [2.6.34] - 2020-04-28
+
+### Fixed
+
+-   Create a unique round ID for elasticsearch ([#3659])
+
+### Changed
+
+-   Update @arkecosystem/utils dependency ([#3665])
+-   Use tree memory structure to sort by fee and by sender nonce **(core-transaction-pool)** ([#3667])
+
+## [2.6.31] - 2020-03-25
+
+### Fixed
+
+-   Allow transition to fork from idle ([#3614])
+
+## [2.6.30] - 2020-03-19
+
+### Changed
+
+-   Optimize database adding indexes ([#3605])
+-   Restrict some api sorting and filtering parameters that are not needed ([#3605])
+
+## [2.6.29] - 2020-03-13
+
+Re-release for NPM.
+
+## [2.6.28] - 2020-03-13
+
+### Changed
+
+-   Reset missedBlocks before await call ([#3598])
+
+## [2.6.27] - 2020-03-12
+
+### Fixed
+
+-   Always apply to sender wallet on `acceptChainedBlock` ([#3594])
+-   Block incomplete sockets ([#3596])
+
+## [2.6.25] - 2020-03-09
+
+### Fixed
+
+Fix block apply issue where in some cases transaction could be applied twice to recipient in transaction pool ([#3590])
+
+## [2.6.24] - 2020-03-04
+
+### Fixed
+
+-   add missing transactions.type_group index ([#3573])
+
+### Changed
+
+-   update xstate to v4.8.0 ([#3575])
+-   use application events from core-event-emitter ([#3574])
+
+## [2.6.21] - 2020-03-04
+
+### Fixed
+
+-   Set height 1 on config manager for processing genesis block (blockchain replay) ([#3561])
+-   Handle multiple installations of jemalloc ([#3562])
+-   jemalloc compatibility for ubuntu 16.04 ([#3567])
+-   Always call applyToRecipient ([#3570])
+
+### Changed
+
+-   Allow multiple ports in bridgechain schema ([#3504])
+-   Allow to resign business only when bridgechains are resigned ([#3524])
+-   Make bridgechain genesis hash only unique per wallet ([#3523])
+-   Add exceptions for business resignation ([#3551])
+-   No default addonBytes for magistrate transactions ([#3560])
+-   Use jemalloc as the memory allocator ([#3541])
+
+## [2.6.11] - 2020-02-26
+
+### Fixed
+
+-   Only accept valid http path (SC http server) ([#3537])
+
+## [2.6.10] - 2020-02-20
+
+### Fixed
+
+-   Disable permessage-deflate ([#3518])
+
+## [2.6.9] - 2020-02-19
+
+### Added
+
+-   Filter peers by version range ([#3465])
+-   Add flag to skip export of rolled back transactions ([#3459])
+
+### Fixed
+
+-   Check for missed blocks before applying round ([#3507])
+-   Make app.js optional as initially intended ([#3510])
+-   Multisig legacy allow signatures property ([#3489])
+
+### Changed
+
+-   Remove pm2 from docker ([#3505])
+-   Use findByPublicKey to set both publickey and address on the multisig wallet ([#3498])
+-   Remove long dependency ([#3502])
+
+## [2.6.1] - 2020-02-11
+
+### Changed
+
+-   Update `@arkecosystem/exchange-json-rpc`
+
+## [2.6.0] - 2020-02-11
+
+### Added
+
+-   Expose `isValidPeer` via ajv format rule ([#2960])
+-   Implement AIP 102 ([#2773])
+-   Implement AIP 103 ([#2858])
+-   Implement MultiPayment (AIP11) ([#2669])
+-   Implement nonces ([#2573])
+-   Multi Signature support for WIF ([#2979])
+-   Transaction type dependencies ([#2859])
+-   Add nonce to wallet transformer ([#2760])
+-   Allow easy retrieval of first and last block ([#2641])
+-   Allow retrieval of raw blocks and transactions ([#2616])
+-   Endpoints for locks/businesses/bridgechains ([#2940])
+-   Find htlc unlock transactions ([#2976])
+-   Include core version in node/configuration ([#2855])
+-   Search transactions by asset ([#2618])
+-   Enforce transactions' nonce order from blockProcessor ([#2873])
+-   Change minimum version via milestone ([#2869])
+-   Use compression on the p2p level ([#2886])
+-   Add support for transaction nonces ([#2925])
+-   Attributes getter/setter for wallet ([#2839])
+-   Wallet Manager indexes ([#2845])
+-   Register wallet attributes before accessing them ([#2867])
+-   Allow CLI command configurations ([#2972])
+-   Allow passing height to `configManager.isNewMilestone` ([#3001])
+-   Expose transaction height, blockId and generatorPublicKey during bootstrap ([#3096])
+-   Add `/transactions/schemas` endpoint ([#3083])
+-   Implement businesses/bridgechains endpoint ([#3119])
+-   Implement throttling on outgoing p2p communication ([#3170])
+-   Implement Address.fromWIF method ([#3228])
+
+### Fixed
+
+-   Always deserialize vendor field ([b537d6f327e939ff40b680ea7d558e8fdb3ac921])
+-   Basic validation on incoming p2p data + terminate socket on error ([#3037])
+-   Clone webhook before mutating it ([#2863])
+-   Delete existing payload processor db ([#2864])
+-   Do not sort transactions in forger / update purgeByBlock logic for handling nonces ([#2678])
+-   HTLC refund handler to use performGenericWalletChecks ([#2944])
+-   Move wallet manager "zero balance" check to transaction handlers ([#2896])
+-   Multipayment balance / vote balance ([#2838])
+-   Range selection in pool's getTransactions() ([#2952])
+-   `/wallets/{id}/transactions` search parameters ([#2923])
+-   Return block timestamp for v2 transactions ([#2906])
+-   Return count of filtered peers ([#2814])
+-   Clear queue on invalid block ([#2897])
+-   Do not reset `noBlockCounter` when `downloadBlocks` succeeds ([#2968])
+-   Only shift milestoneHeights[] if at that height ([#2904])
+-   Round deletion during rollback ([#2970])
+-   Prefix table names with schema ([#2830])
+-   Store vendor field in bytea ([#3048])
+-   Add missing typeGroup and emit StateStarting ([#2932])
+-   Use correct IV length for encryption ([#3036])
+-   Disconnect if api reports different network ([#2909])
+-   Don't cause suspensions for unresponsive plugins ([34749bf84bcec3fecd0098c0d42f52deb1f6ba4a])
+-   Fix the genesis block id during verify ([#2809])
+-   Export/import transactions type_group ([#2996])
+-   Remove bogus skipRoundRows ([#2973])
+-   `buildDelegateRanking` called too early ([#2921])
+-   `buildVoteBalances` called too early ([#2920])
+-   Differentiate between wallets and delegates ([#2854])
+-   Index recipient wallets during bootstrap ([#2947])
+-   Copy vote target into temp wallet manager ([1209a36366c8fd3ba31fab2463011b7ce1a7d844])
+-   Sort by fee, nonce ([#2937])
+-   Implement Delegate resignation ([#3045])
+-   Reject delegate resignation if not enough active delegates ([#2919])
+-   Update wallet nonce when applying v1 transaction ([#2959])
+-   Use supply calculator in delegate approval calculation ([#2918])
+-   Cast params in condition checks ([#2887])
+-   Add legacy multisignature schema ([#3040])
+-   Ensure only one signature per participant ([#2889])
+-   Handle mainnet address exceptions ([#3055])
+-   HTLC lock buffer allocation ([#2936])
+-   Legacy multi signature verification ([#2898])
+-   Run ajv validator again when encountering exceptions ([#3008])
+-   Use `anyOf` for transactions schema ([#2894])
+-   Use 2 bytes to store number of payments ([#2928])
+-   Use strict comparison to decide if a transaction should be enabled ([#3087])
+-   Include typeGroup in `/transactions/fees` and `/node/fees` endpoints ([#3193])
+-   Add missing offset handling to /api/peers ([#3075])
+-   Use numerics for typeGroups in /transactions/types ([#3112])
+-   Add transactions back to pool only after reverting all blocks ([#3138])
+-   Pass IBlockData to processBlocks instead of IBlock ([#3426])
+-   Don't assume blocksInCurrentRound is defined ([#3341])
+-   Set last height before initializing last block to use correct milestones ([#3109])
+-   Don't swallow BIP38 errors ([#3271])
+-   Use the request origin to avoid 404s ([#3071])
+-   Raise `getCommonBlocks` rate limit ([#3069])
+-   Return error when app is not ready ([#3171])
+-   Uncaught IPC timeout ([#3140])
+-   Support nonces and chunk transactions before broadcast ([#3081])
+-   Create new wallet if not found ([#3086])
+-   Wallet-manager fallback to database wallet manager findByIndex() when no "local" match ([#3256])
+-   Throw if transaction key is already taken ([#3095])
+-   Update sender's wallet after validation ([#3291])
+-   Prevent snapshot commands from running if core is running ([#3196])
+-   Remove password flag constraint for core:forger command ([#3270])
+-   Properly implement block size limit ([#3154])
+-   Strengthen schema validation checks ([#3062])
+
+### Changed
+
+-   Log the reason for discarding a block ([#2903])
+-   Accept prerelease version ([#2911])
+-   Add `round.missed` event ([#3011])
+-   Do not temporary increment/decrement nonce when checking transaction validity ([#2587])
+-   Increase transaction type size ([#2861])
+-   Reject V1 transactions after milestone ([#2879])
+-   Remove `vendorFieldHex` ([#3014])
+-   Remove asset migration heuristic ([#2999])
+-   Return all registered transaction types ([#2878])
+-   Strengthen a nonce check in performGenericWalletChecks() ([#2949])
+-   Add default transaction fees ([#2842])
+-   Add `vendorField` and `timestamp` to `/locks` endpoint ([#3005])
+-   Integrate hapi-pagination to replace fork ([#2994])
+-   Use pagination configuration limit ([032caa1b990e91937e4bc1561bc1aeaeca9e37d9])
+-   Break loop if block contains v1 transaction ([#2914])
+-   Add nonce column ([#2844])
+-   Emit `forging.missing` earlier ([#2893])
+-   Emit missing `transaction.reverted` event and remove obsolete ones ([#2895])
+-   Cleanup socket errors ([#3056])
+-   Increase network timeouts ([#2828])
+-   Make peer reply errors less verbose ([#2962])
+-   Share rate limiter between workers ([#2912])
+-   Expose current block for transaction handlers ([#2856])
+-   Clear cached transaction ids after accepting block ([#2916])
+-   Don't accept expired v1 transactions ([#2948])
+-   Bootstrap transactions in batches ([#2997])
+-   Elaborate the unexpected nonce error ([#2943])
+-   HTLC implementation ([#2915])
+-   Make handler functions asynchronous ([#2865])
+-   Use default heap size regardless of available memory ([#2998])
+-   Change maximum recipients of multipayment via milestone ([#2961])
+-   Export abstract builder for use by plugins ([#2721])
+-   Fallback to ECDSA signature for version 2 transactions ([#2584])
+-   Make error more verbose ([#2938])
+-   Move base58 functions to utils ([#2675])
+-   ECDSA Signature deserialization for v2 transactions ([#2877])
+-   Remove unnecessary check from validateTransactions() ([#2951])
+-   Fallback to core typegroup if querying by type ([#3147])
+-   Integrate hapi-pagination to replace fork ([#3034])
+-   Sort peers by height, latency ([#3078])
+-   Add `stateBuilder.finished` to ApplicationEvents ([#3084])
+-   Make deserializers static ([#3234])
+-   Fix genesis and exception transactions cache ([#3296])
+-   Overwrite arrays when merging milestones ([#3108])
+
+### Performance
+
+-   Avoid O(m\*n) when filtering pool txs and simplify the code ([#2941])
+-   Ditch unnecessary reindex() in multi-payment bootstrap ([#3022])
+-   Keep genesis block instance in-memory ([7a73aef8b29d40572d1524cf8b1bafbffa3b0964])
+-   Use lodash to efficiently remove forged transactions ([#2942])
+-   Add index on transactions.type ([#3043])
+-   Speed up nonce checks at DB level ([#2910])
+-   Make address network byte check part of serde ([#3000])
+-   Memoize base58 de/encoding ([#3015])
+-   Replace bignumber.js with native BigInt ([#3010])
+-   Replace bs58check with bstring ([#2673])
+-
+
+## [2.5.38] - 2020-01-21
+
+Rerelease of 2.5.37 due to some npm issues.
+
+## [2.5.37] - 2020-01-21
+
+### Fixed
+
+-   Remove banning when peer opens multiple sockets ([#3409])
+
+## [2.5.36] - 2020-01-21
+
+### Fixed
+
+-   Discard blocks containing too many transactions ([#3404])
+-   Disconnect when multiple sockets are opened from same IP ([#3404])
+-   Handle invalid WS opcodes ([#3404])
+-   Disconnect for p2p SocketCluster events that do not have a handler ([#3404])
+-   Handle payload with additional properties ([#3404])
+
+## [2.5.31] - 2019-12-19
+
+### Fixed
+
+-   Handle disconnect packets ([#3354])
+
+## [2.5.30] - 2019-12-09
+
+### Fixed
+
+-   Stricter p2p msg check + ip blocking ([#3331])
+-   Purge ipLastError every hour ([#3331])
+
+## [2.5.28] - 2019-11-05
+
+### Fixed
+
+-   Stricter WS/SC events/messages handling ([#3208])
+-   Handle unwanted control frames ([#3208])
+
+### Changed
+
+-   Prepare for upcoming 2.6 release ([#3208])
+
+## [2.5.26] - 2019-10-07
+
+### Changed
+
+-   Integrate hapi-pagination to replace fork ([#3030])
+
 ## [2.5.25] - 2019-09-19
 
 ### Fixed

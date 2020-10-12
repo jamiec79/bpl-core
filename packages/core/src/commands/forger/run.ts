@@ -1,6 +1,8 @@
 import { app } from "@blockpool-io/core-container";
 import { flags } from "@oclif/command";
+import deepmerge from "deepmerge";
 import { CommandFlags } from "../../types";
+import { getCliConfig } from "../../utils";
 import { BaseCommand } from "../command";
 
 export class RunCommand extends BaseCommand {
@@ -8,10 +10,10 @@ export class RunCommand extends BaseCommand {
 
     public static examples: string[] = [
         `Run a forger with a bip39 passphrase
-$ bpl forger:run --bip39="..."
+$ ark forger:run --bip39="..."
 `,
         `Run a forger with an encrypted bip38
-$ bpl forger:run --bip38="..." --password="..."
+$ ark forger:run --bip38="..." --password="..."
 `,
     ];
 
@@ -24,19 +26,23 @@ $ bpl forger:run --bip38="..." --password="..."
     };
 
     public async run(): Promise<void> {
-        const { flags } = await this.parseWithNetwork(RunCommand);
+        const { flags, paths } = await this.parseWithNetwork(RunCommand);
 
-        await this.buildApplication(app, flags, {
-            include: [
-                "@blockpool-io/core-event-emitter",
-                "@blockpool-io/core-config",
-                "@blockpool-io/core-logger",
-                "@blockpool-io/core-logger-pino",
-                "@blockpool-io/core-forger",
-            ],
-            options: {
-                "@blockpool-io/core-forger": await this.buildBIP38(flags),
-            },
-        });
+        await this.buildApplication(
+            app,
+            flags,
+            deepmerge(getCliConfig(flags, paths), {
+                include: [
+                    "@blockpool-io/core-event-emitter",
+                    "@blockpool-io/core-config",
+                    "@blockpool-io/core-logger",
+                    "@blockpool-io/core-logger-pino",
+                    "@blockpool-io/core-forger",
+                ],
+                options: {
+                    "@blockpool-io/core-forger": await this.buildBIP38(flags),
+                },
+            }),
+        );
     }
 }

@@ -1,6 +1,6 @@
 import { Enums } from "@blockpool-io/crypto";
 
-const { Ipfs } = Enums.TransactionTypes;
+const { Ipfs } = Enums.TransactionType;
 
 export {};
 

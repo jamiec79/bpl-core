@@ -1,6 +1,6 @@
 import "../../mocks/core-container";
 
-import { Crypto } from "@arkecosystem/crypto";
+import { Crypto } from "@blockpool-io/crypto";
 import { replySchemas } from "../../../../../packages/core-p2p/src/schemas";
 import { validate } from "../../../../../packages/core-p2p/src/socket-server/utils/validate";
 import { getStatus } from "../../../../../packages/core-p2p/src/socket-server/versions/peer";
@@ -30,38 +30,38 @@ describe("Peer reply validation", () => {
             const result = await getStatus();
 
             (result.config as any).plugins = {
-                "@arkecosystem/core-api": {
+                "@blockpool-io/core-api": {
                     enabled: true,
                     port: 4003,
                     x: 1,
                 },
-                "@arkecosystem/core-exchange-json-rpc": {
+                "@blockpool-io/core-exchange-json-rpc": {
                     enabled: false,
                     port: 8080,
                 },
-                "@arkecosystem/core-webhooks": {
+                "@blockpool-io/core-webhooks": {
                     enabled: false,
                     port: 4004,
                 },
             };
 
             expect(() => validate(schema, result)).not.toThrowError();
-            expect(result.config.plugins["@arkecosystem/core-api"]).not.toHaveProperty("x");
+            expect(result.config.plugins["@blockpool-io/core-api"]).not.toHaveProperty("x");
 
             result.config.plugins = {
                 aa: {
                     enabled: true,
                     port: 4002,
                 },
-                "@arkecosystem/core-api-core-exchange-json-rpc-core-exchange-json-rpc": {
+                "@blockpool-io/core-api-core-exchange-json-rpc-core-exchange-json-rpc": {
                     enabled: true,
                     port: 4003,
                 },
-                "@arkecosystem/core-exchange-json-rpc": {
+                "@blockpool-io/core-exchange-json-rpc": {
                     enabled: false,
                     port: 8080,
                 },
-                "@arkecosystem/core-webhooks": {
+                "@blockpool-io/core-webhooks": {
                     enabled: false,
                     port: 4004,
                 },
@@ -69,7 +69,7 @@ describe("Peer reply validation", () => {
 
             expect(() => validate(schema, result)).not.toThrowError();
             expect(result).not.toHaveProperty("aa");
-            expect(result).not.toHaveProperty("@arkecosystem/core-api-core-exchange-json-rpc-core-exchange-json-rpc");
+            expect(result).not.toHaveProperty("@blockpool-io/core-api-core-exchange-json-rpc-core-exchange-json-rpc");
         });
 
         it("should fail with too many properties", async () => {
@@ -78,7 +78,7 @@ describe("Peer reply validation", () => {
 
             result.config.plugins = {};
             for (let i = 0; i < 32; i++) {
-                result.config.plugins[`@arkecosystem/core-api-${i}`] = {
+                result.config.plugins[`@blockpool-io/core-api-${i}`] = {
                     enabled: true,
                     port: 4003,
                 };

@@ -274,20 +274,21 @@ const walletsMix = {
     },
 };
 
-const bpltoshi = 10 ** 8;
-const transferAmount = 10 * bpltoshi;
+const arktoshi = 10 ** 8;
+const transferAmount = 10 * arktoshi;
 const amountNeeded = {
-    transfer: transferAmount + 0.1 * bpltoshi,
-    vote: 1 * bpltoshi,
-    secondSignRegistration: 5 * bpltoshi,
-    delegateRegistration: 25 * bpltoshi,
+    transfer: transferAmount + 0.1 * arktoshi,
+    vote: 1 * arktoshi,
+    secondSignRegistration: 5 * arktoshi,
+    delegateRegistration: 25 * arktoshi,
 };
 
 const fees = {
-    transfer: 0.1 * bpltoshi,
-    vote: 1 * bpltoshi,
-    secondSignRegistration: 5 * bpltoshi,
-    delegateRegistration: 25 * bpltoshi,
+    transfer: 0.1 * arktoshi,
+    vote: 1 * arktoshi,
+    secondSignRegistration: 5 * arktoshi,
+    delegateRegistration: 25 * arktoshi,
+    ipfs: 5 * arktoshi,
 };
 
 module.exports = {

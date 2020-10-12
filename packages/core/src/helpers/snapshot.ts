@@ -1,22 +1,29 @@
 import { app } from "@blockpool-io/core-container";
 import { Container } from "@blockpool-io/core-interfaces";
+import deepmerge from "deepmerge";
+import envPaths from "env-paths";
 import { lstatSync, readdirSync } from "fs";
 import prompts from "prompts";
 import { CommandFlags } from "../types";
+import { getCliConfig } from "../utils";
 
 // tslint:disable-next-line:no-var-requires
 const { version } = require("../../package.json");
 
-export const setUpLite = async (options): Promise<Container.IContainer> => {
-    await app.setUp(version, options, {
-        include: [
-            "@blockpool-io/core-event-emitter",
-            "@blockpool-io/core-logger-pino",
-            "@blockpool-io/core-state",
-            "@blockpool-io/core-database-postgres",
-            "@blockpool-io/core-snapshots",
-        ],
-    });
+export const setUpLite = async (options, paths: envPaths.Paths): Promise<Container.IContainer> => {
+    await app.setUp(
+        version,
+        options,
+        deepmerge(getCliConfig(options, paths), {
+            include: [
+                "@blockpool-io/core-event-emitter",
+                "@blockpool-io/core-logger-pino",
+                "@blockpool-io/core-state",
+                "@blockpool-io/core-database-postgres",
+                "@blockpool-io/core-snapshots",
+            ],
+        }),
+    );
 
     return app;
 };

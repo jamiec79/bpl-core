@@ -1,6 +1,6 @@
 import "jest-extended";
 
-import { Interfaces, Utils } from "@blockpool-io/crypto";
+import { Interfaces, Managers, Utils } from "@blockpool-io/crypto";
 import ByteBuffer from "bytebuffer";
 import { Delegate } from "../../../../packages/core-forger/src/delegate";
 import { Block, BlockFactory } from "../../../../packages/crypto/src/blocks";
@@ -129,19 +129,36 @@ describe("Block", () => {
         });
 
         it("should fail to verify a block with too large payload", () => {
+            let block = BlockFactory.fromData(dummyBlock);
+
             jest.spyOn(configManager, "getMilestone").mockImplementation(height => ({
                 block: {
                     version: 0,
                     maxTransactions: 200,
-                    maxPayload: 0,
+                    maxPayload: Buffer.from(block.serialized, "hex").byteLength - 1,
                 },
                 reward: 200000000,
                 vendorFieldLength: 64,
             }));
-            const block = BlockFactory.fromData(dummyBlock);
+            let verification = block.verify();
 
-            expect(block.verification.verified).toBeFalse();
-            expect(block.verification.errors).toContain("Payload is too large");
+            expect(verification.verified).toBeFalse();
+            expect(verification.errors[0]).toContain("Payload is too large");
+
+            jest.spyOn(configManager, "getMilestone").mockImplementation(height => ({
+                block: {
+                    version: 0,
+                    maxTransactions: 200,
+                    maxPayload: Buffer.from(block.serialized, "hex").byteLength,
+                },
+                reward: 200000000,
+                vendorFieldLength: 64,
+            }));
+            block = BlockFactory.fromData(dummyBlock);
+            verification = block.verify();
+
+            expect(verification.verified).toBeTrue();
+            expect(verification.errors).toBeEmpty();
 
             jest.restoreAllMocks();
         });
@@ -182,10 +199,10 @@ describe("Block", () => {
             };
             const transactions = TransactionFactory.transfer("ANYiQJSPSoDT8U9Quh5vU8timD2RM7RS38", 10)
                 .withNetwork("testnet")
+                .withVersion(2)
+                .withExpiration(52)
                 .withPassphrase("super cool passphrase")
                 .create();
-
-            transactions[0].expiration = 52;
 
             const block: IBlock = delegate.forge(transactions, optionsDefault);
             expect(block.verification.verified).toBeFalse();
@@ -203,6 +220,7 @@ describe("Block", () => {
                 },
                 reward: Utils.BigNumber.make(0),
             };
+
             const transactions = TransactionFactory.transfer("ANYiQJSPSoDT8U9Quh5vU8timD2RM7RS38", 1)
                 .withNetwork("testnet")
                 .withVersion(1)
@@ -210,9 +228,11 @@ describe("Block", () => {
                 .withPassphrase("super cool passphrase")
                 .create();
 
+            Managers.configManager.getMilestone().aip11 = false;
             const block: IBlock = delegate.forge(transactions, optionsDefault);
             expect(block.verification.verified).toBeFalse();
             expect(block.verification.errors).toContain(`Encountered expired transaction: ${transactions[0].id}`);
+            Managers.configManager.getMilestone().aip11 = true;
         });
 
         it("should verify a block with future transaction timestamp if within blocktime", () => {
@@ -226,6 +246,7 @@ describe("Block", () => {
                 },
                 reward: Utils.BigNumber.make(0),
             };
+
             const transactions = TransactionFactory.transfer("ANYiQJSPSoDT8U9Quh5vU8timD2RM7RS38", 1)
                 .withNetwork("testnet")
                 .withVersion(1)
@@ -237,8 +258,10 @@ describe("Block", () => {
                 .withPassphrase("super cool passphrase")
                 .create();
 
+            Managers.configManager.getMilestone().aip11 = false;
             const block: IBlock = delegate.forge(transactions, optionsDefault);
             expect(block.verification.verified).toBeTrue();
+            Managers.configManager.getMilestone().aip11 = true;
         });
 
         it("should fail to verify a block with future transaction timestamp", () => {
@@ -252,6 +275,7 @@ describe("Block", () => {
                 },
                 reward: Utils.BigNumber.make(0),
             };
+
             const transactions = TransactionFactory.transfer("ANYiQJSPSoDT8U9Quh5vU8timD2RM7RS38", 1)
                 .withNetwork("testnet")
                 .withVersion(1)
@@ -263,9 +287,11 @@ describe("Block", () => {
                 .withPassphrase("super cool passphrase")
                 .create();
 
+            Managers.configManager.getMilestone().aip11 = false;
             const block: IBlock = delegate.forge(transactions, optionsDefault);
             expect(block.verification.verified).toBeFalse();
             expect(block.verification.errors).toContain(`Encountered future transaction: ${transactions[0].id}`);
+            Managers.configManager.getMilestone().aip11 = true;
         });
 
         it("should accept block with future transaction timestamp if milestone is active", () => {
@@ -279,6 +305,7 @@ describe("Block", () => {
                 },
                 reward: Utils.BigNumber.make(0),
             };
+
             const transactions = TransactionFactory.transfer("ANYiQJSPSoDT8U9Quh5vU8timD2RM7RS38", 1)
                 .withNetwork("mainnet")
                 .withVersion(1)
@@ -305,6 +332,7 @@ describe("Block", () => {
                 },
                 reward: Utils.BigNumber.make(0),
             };
+
             const transactions = TransactionFactory.transfer("ANYiQJSPSoDT8U9Quh5vU8timD2RM7RS38", 1)
                 .withNetwork("mainnet")
                 .withVersion(1)
@@ -332,6 +360,132 @@ describe("Block", () => {
             expect(block.verification.errors).toEqual([errorMessage]);
 
             jest.restoreAllMocks();
+        });
+
+        it("should fail to verify a block with invalid S in signature (not low S value)", () => {
+            const block = BlockFactory.fromData({
+                id: "62b348a7aba2c60506929eec1311eaecb48ef232d4b154db2ede3f5e53700be9",
+                version: 0,
+                timestamp: 102041016,
+                height: 5470549,
+                reward: Utils.BigNumber.make("200000000"),
+                previousBlock: "2d270cae7e2bd9da27f6160b521859820f2c90315672e1774733bdd6415abb86",
+                numberOfTransactions: 0,
+                totalAmount: Utils.BigNumber.ZERO,
+                totalFee: Utils.BigNumber.ZERO,
+                payloadLength: 0,
+                payloadHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                generatorPublicKey: "026a423b3323de175dd82788c7eab57850c6a37ea6a470308ebadd7007baf8ceb3",
+                blockSignature:
+                    "3045022100c92d7d0c3ea2ba72576f6494a81fc498d0420286896f806a7ead443d0b5d89720220501610f0d5498d028fd27676ea2597a5cb80cf5896e77fe2fa61623d31ff290c",
+            });
+
+            expect(block.verification.verified).toBeTrue();
+            expect(block.verification.errors).toEqual([]);
+
+            const blockHighS = BlockFactory.fromData({
+                id: "62b348a7aba2c60506929eec1311eaecb48ef232d4b154db2ede3f5e53700be9",
+                version: 0,
+                timestamp: 102041016,
+                height: 5470549,
+                reward: Utils.BigNumber.make("200000000"),
+                previousBlock: "2d270cae7e2bd9da27f6160b521859820f2c90315672e1774733bdd6415abb86",
+                numberOfTransactions: 0,
+                totalAmount: Utils.BigNumber.ZERO,
+                totalFee: Utils.BigNumber.ZERO,
+                payloadLength: 0,
+                payloadHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                generatorPublicKey: "026a423b3323de175dd82788c7eab57850c6a37ea6a470308ebadd7007baf8ceb3",
+                blockSignature:
+                    "3045022100c92d7d0c3ea2ba72576f6494a81fc498d0420286896f806a7ead443d0b5d89720220afe9ef0f2ab672fd702d898915da6858ef2e0d8e18612058c570fc4f9e371835",
+            });
+
+            expect(blockHighS.verification.verified).toBeFalse();
+            expect(blockHighS.verification.errors).toEqual(["Failed to verify block signature"]);
+        });
+
+        it("should fail to verify a block with wrong signature length", () => {
+            const block = BlockFactory.fromData({
+                id: "62b348a7aba2c60506929eec1311eaecb48ef232d4b154db2ede3f5e53700be9",
+                version: 0,
+                timestamp: 102041016,
+                height: 5470549,
+                reward: Utils.BigNumber.make("200000000"),
+                previousBlock: "2d270cae7e2bd9da27f6160b521859820f2c90315672e1774733bdd6415abb86",
+                numberOfTransactions: 0,
+                totalAmount: Utils.BigNumber.ZERO,
+                totalFee: Utils.BigNumber.ZERO,
+                payloadLength: 0,
+                payloadHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                generatorPublicKey: "026a423b3323de175dd82788c7eab57850c6a37ea6a470308ebadd7007baf8ceb3",
+                blockSignature:
+                    "3045022100c92d7d0c3ea2ba72576f6494a81fc498d0420286896f806a7ead443d0b5d89720220501610f0d5498d028fd27676ea2597a5cb80cf5896e77fe2fa61623d31ff290c",
+            });
+
+            expect(block.verification.verified).toBeTrue();
+            expect(block.verification.errors).toEqual([]);
+
+            const blockInvalidSignatureLength = BlockFactory.fromData({
+                id: "62b348a7aba2c60506929eec1311eaecb48ef232d4b154db2ede3f5e53700be9",
+                version: 0,
+                timestamp: 102041016,
+                height: 5470549,
+                reward: Utils.BigNumber.make("200000000"),
+                previousBlock: "2d270cae7e2bd9da27f6160b521859820f2c90315672e1774733bdd6415abb86",
+                numberOfTransactions: 0,
+                totalAmount: Utils.BigNumber.ZERO,
+                totalFee: Utils.BigNumber.ZERO,
+                payloadLength: 0,
+                payloadHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                generatorPublicKey: "026a423b3323de175dd82788c7eab57850c6a37ea6a470308ebadd7007baf8ceb3",
+                blockSignature:
+                    "3046022100c92d7d0c3ea2ba72576f6494a81fc498d0420286896f806a7ead443d0b5d89720220501610f0d5498d028fd27676ea2597a5cb80cf5896e77fe2fa61623d31ff290c00",
+            });
+
+            expect(blockInvalidSignatureLength.verification.verified).toBeFalse();
+            expect(blockInvalidSignatureLength.verification.errors).toEqual(["Failed to verify block signature"]);
+        });
+
+        it("should fail to verify a block with negative R", () => {
+            const block = BlockFactory.fromData({
+                id: "62b348a7aba2c60506929eec1311eaecb48ef232d4b154db2ede3f5e53700be9",
+                version: 0,
+                timestamp: 102041016,
+                height: 5470549,
+                reward: Utils.BigNumber.make("200000000"),
+                previousBlock: "2d270cae7e2bd9da27f6160b521859820f2c90315672e1774733bdd6415abb86",
+                numberOfTransactions: 0,
+                totalAmount: Utils.BigNumber.ZERO,
+                totalFee: Utils.BigNumber.ZERO,
+                payloadLength: 0,
+                payloadHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                generatorPublicKey: "026a423b3323de175dd82788c7eab57850c6a37ea6a470308ebadd7007baf8ceb3",
+                blockSignature:
+                    "3045022100c92d7d0c3ea2ba72576f6494a81fc498d0420286896f806a7ead443d0b5d89720220501610f0d5498d028fd27676ea2597a5cb80cf5896e77fe2fa61623d31ff290c",
+            });
+
+            expect(block.verification.verified).toBeTrue();
+            expect(block.verification.errors).toEqual([]);
+
+            const blockInvalidR = BlockFactory.fromData({
+                id: "62b348a7aba2c60506929eec1311eaecb48ef232d4b154db2ede3f5e53700be9",
+                version: 0,
+                timestamp: 102041016,
+                height: 5470549,
+                reward: Utils.BigNumber.make("200000000"),
+                previousBlock: "2d270cae7e2bd9da27f6160b521859820f2c90315672e1774733bdd6415abb86",
+                numberOfTransactions: 0,
+                totalAmount: Utils.BigNumber.ZERO,
+                totalFee: Utils.BigNumber.ZERO,
+                payloadLength: 0,
+                payloadHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                generatorPublicKey: "026a423b3323de175dd82788c7eab57850c6a37ea6a470308ebadd7007baf8ceb3",
+                blockSignature:
+                    "30440220c92d7d0c3ea2ba72576f6494a81fc498d0420286896f806a7ead443d0b5d89720220501610f0d5498d028fd27676ea2597a5cb80cf5896e77fe2fa61623d31ff290c",
+            });
+
+            expect(blockInvalidR.verification.verified).toBeFalse();
+            expect(blockInvalidR.verification.errors).toEqual(["Failed to verify block signature"]);
         });
 
         it("should construct the block (header only)", () => {
@@ -527,11 +681,13 @@ describe("Block", () => {
                 "%s",
                 (network: NetworkName, length: number) => {
                     configManager.setFromPreset(network);
+                    configManager.getMilestone().aip11 = false;
 
                     const block: Interfaces.IBlock = BlockFactory.fromJson(networks[network].genesisBlock);
 
                     expect(block.serialized).toHaveLength(length);
                     expect(block.verifySignature()).toBeTrue();
+                    configManager.getMilestone().aip11 = network === "testnet";
                 },
             );
         });

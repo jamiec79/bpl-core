@@ -1,6 +1,7 @@
 import "./mocks/core-container";
 
 import { P2P } from "@blockpool-io/core-interfaces";
+import delay from "delay";
 import { Peer } from "../../../packages/core-p2p/src/peer";
 import { createPeerService, createStubPeer } from "../../helpers/peers";
 import { MockSocketManager } from "./__support__/mock-socket-server/manager";
@@ -10,6 +11,7 @@ let storage: P2P.IPeerStorage;
 let monitor: P2P.INetworkMonitor;
 let connector: P2P.IPeerConnector;
 let processor: P2P.IPeerProcessor;
+let communicator: P2P.IPeerCommunicator;
 
 beforeAll(async () => {
     process.env.CORE_ENV = "test"; // important for socket server setup (testing), see socket-server/index.ts
@@ -27,7 +29,7 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-    ({ connector, monitor, storage, processor } = createPeerService());
+    ({ connector, communicator, monitor, storage, processor } = createPeerService());
 
     const peer = createStubPeer({
         ip: "127.0.0.1",
@@ -55,6 +57,8 @@ describe("NetworkMonitor", () => {
 
             await monitor.cleansePeers({ fast: true });
 
+            await delay(1000); // removing peer can happen a bit after cleansePeers has resolved
+
             expect(storage.getPeers().length).toBeLessThan(previousLength);
         });
     });
@@ -68,8 +72,8 @@ describe("NetworkMonitor", () => {
                 header: {},
             });
 
-            const getPeersPeerMock = { ip: "1.1.1.1", port: 4000 };
-            await socketManager.addMock("getPeers", [getPeersPeerMock]);
+            const getPeersPeerMock = { ip: "1.2.3.4", port: 4000 };
+            jest.spyOn(communicator, "getPeers").mockResolvedValueOnce([getPeersPeerMock]);
 
             const validateAndAcceptPeer = jest
                 .spyOn(processor, "validateAndAcceptPeer")
@@ -92,7 +96,7 @@ describe("NetworkMonitor", () => {
             storage.setPeer(createStubPeer({ ip: "2.2.2.2", port: 4000, state: { height: 16 } }));
             storage.setPeer(createStubPeer({ ip: "3.3.3.3", port: 4000, state: { height: 24 } }));
 
-            expect(await monitor.getNetworkHeight()).toBe(16);
+            expect(monitor.getNetworkHeight()).toBe(16);
         });
     });
 });

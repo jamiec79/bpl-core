@@ -21,9 +21,6 @@ export const registerRoutes = (server: Hapi.Server): void => {
         handler: controller.store,
         options: {
             plugins: {
-                pagination: {
-                    enabled: false,
-                },
                 "hapi-ajv": {
                     payloadSchema: Schema.store,
                 },
@@ -71,6 +68,12 @@ export const registerRoutes = (server: Hapi.Server): void => {
         method: "GET",
         path: "/transactions/types",
         handler: controller.types,
+    });
+
+    server.route({
+        method: "GET",
+        path: "/transactions/schemas",
+        handler: controller.schemas,
     });
 
     server.route({

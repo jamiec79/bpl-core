@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-tester-cli",
-    "version": "2.5.25",
+    "version": "2.6.57",
     "description": "Tester CLI for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -28,9 +28,9 @@
         "tester": "./bin/run"
     },
     "dependencies": {
-        "@blockpool-io/core-forger": "^2.5.25",
-        "@blockpool-io/core-utils": "^2.5.25",
-        "@blockpool-io/crypto": "^2.5.25",
+        "@blockpool-io/core-forger": "^2.6.57",
+        "@blockpool-io/core-utils": "^2.6.57",
+        "@blockpool-io/crypto": "^2.6.57",
         "@oclif/command": "^1.5.16",
         "@oclif/config": "^1.13.2",
         "@oclif/plugin-help": "^2.2.0",
@@ -38,6 +38,7 @@
         "bip39": "^3.0.2",
         "clipboardy": "^2.1.0",
         "delay": "^4.3.0",
+        "lodash.chunk": "^4.2.0",
         "pino": "^5.12.6",
         "pino-pretty": "^3.2.0",
         "pluralize": "^8.0.0"
@@ -45,7 +46,7 @@
     "devDependencies": {
         "@types/bip39": "^2.4.2",
         "@types/clipboardy": "^2.0.1",
-        "@types/lodash.fill": "^3.4.6",
+        "@types/lodash.chunk": "^4.2.6",
         "@types/pino": "^5.20.0",
         "@types/pluralize": "^0.0.29"
     },
@@ -73,6 +74,5 @@
             "@oclif/plugin-help",
             "@oclif/plugin-not-found"
         ]
-    },
-    "gitHead": "1eb2e9238d9d18aa1c79514c88bf85e524b68256"
+    }
 }

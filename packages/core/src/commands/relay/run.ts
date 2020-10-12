@@ -1,6 +1,8 @@
 import { app } from "@blockpool-io/core-container";
 import { flags } from "@oclif/command";
+import deepmerge from "deepmerge";
 import { CommandFlags } from "../../types";
+import { getCliConfig } from "../../utils";
 import { BaseCommand } from "../command";
 
 export class RunCommand extends BaseCommand {
@@ -8,22 +10,22 @@ export class RunCommand extends BaseCommand {
 
     public static examples: string[] = [
         `Run a relay
-$ bpl relay:run
+$ ark relay:run
 `,
         `Run a genesis relay
-$ bpl relay:run --networkStart
+$ ark relay:run --networkStart
 `,
         `Disable any discovery by other peers
-$ bpl relay:run --disableDiscovery
+$ ark relay:run --disableDiscovery
 `,
         `Skip the initial discovery
-$ bpl relay:run --skipDiscovery
+$ ark relay:run --skipDiscovery
 `,
         `Ignore the minimum network reach
-$ bpl relay:run --ignoreMinimumNetworkReach
+$ ark relay:run --ignoreMinimumNetworkReach
 `,
         `Start a seed
-$ bpl relay:run --launchMode=seed
+$ ark relay:run --launchMode=seed
 `,
     ];
 
@@ -40,16 +42,20 @@ $ bpl relay:run --launchMode=seed
     };
 
     public async run(): Promise<void> {
-        const { flags } = await this.parseWithNetwork(RunCommand);
+        const { flags, paths } = await this.parseWithNetwork(RunCommand);
 
-        await super.buildApplication(app, flags, {
-            exclude: ["@blockpool-io/core-forger"],
-            options: {
-                "@blockpool-io/core-p2p": this.buildPeerOptions(flags),
-                "@blockpool-io/core-blockchain": {
-                    networkStart: flags.networkStart,
+        await super.buildApplication(
+            app,
+            flags,
+            deepmerge(getCliConfig(flags, paths), {
+                exclude: ["@blockpool-io/core-forger"],
+                options: {
+                    "@blockpool-io/core-p2p": this.buildPeerOptions(flags),
+                    "@blockpool-io/core-blockchain": {
+                        networkStart: flags.networkStart,
+                    },
                 },
-            },
-        });
+            }),
+        );
     }
 }
