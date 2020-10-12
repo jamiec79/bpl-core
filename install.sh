@@ -209,7 +209,14 @@ success "Installed system updates!"
 
 heading "Installing BPL Core..."
 
-while ! yarn global add @blockpool-io/core ; do
+cd ~
+if [ -f bpl-core ]; then
+    mv bpl-core bpl-core-bak
+fi
+rm -rf bpl-core
+git clone https://github.com/blockpool-io/bpl-core
+cd bpl-core
+while ! yarn setup:clean ; do
     read -p "Installing Blockpool Core failed, do you want to retry? [y/N]: " choice
     if [[ ! "$choice" =~ ^(yes|y|Y) ]] ; then
         exit 1
