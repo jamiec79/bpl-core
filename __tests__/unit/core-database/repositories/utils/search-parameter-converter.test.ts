@@ -10,7 +10,7 @@ describe("SearchParameterConverter", () => {
 
     it("should parse all supported operators", () => {
         const params = {
-            id: "343-guilty-spbpl",
+            id: "343-guilty-spark",
             timestamp: { from: "100", to: "1000" },
             sentence: "a partial",
             basket: ["apples", "pears", "bananas"],
@@ -22,7 +22,7 @@ describe("SearchParameterConverter", () => {
         expect(searchParameters.paginate).toBeUndefined();
         expect(searchParameters.parameters).toHaveLength(5);
         expect(searchParameters.parameters[0].field).toEqual("id");
-        expect(searchParameters.parameters[0].value).toEqual("343-guilty-spbpl");
+        expect(searchParameters.parameters[0].value).toEqual("343-guilty-spark");
         expect(searchParameters.parameters[0].operator).toEqual(Database.SearchOperator.OP_EQ);
 
         expect(searchParameters.parameters[1].field).toEqual("timestamp");

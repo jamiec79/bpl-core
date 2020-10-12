@@ -1,14 +1,14 @@
 import "jest-extended";
 
-import "./mocks/core-container";
+import { eventEmitter } from "./mocks/core-container";
 
 import { P2P } from "@blockpool-io/core-interfaces";
-import { Transactions } from "@blockpool-io/crypto";
+import { Blocks, Transactions } from "@blockpool-io/crypto";
 import { getPeerConfig } from "../../../packages/core-p2p/src/socket-server/utils/get-peer-config";
 import { createPeerService, createStubPeer } from "../../helpers/peers";
 import { TransactionFactory } from "../../helpers/transaction-factory";
 import { genesisBlock } from "../../utils/config/unitnet/genesisBlock";
-import genesisBlockJSON from "../../utils/config/unitnet/genesisBlock.json";
+import { blocks2to100 } from "../../utils/fixtures/testnet/blocks2to100";
 import { delegates } from "../../utils/fixtures/unitnet";
 import { MockSocketManager } from "./__support__/mock-socket-server/manager";
 
@@ -54,7 +54,13 @@ describe("PeerCommunicator", () => {
     describe("postBlock", () => {
         it("should get back success when posting genesis block", async () => {
             await socketManager.addMock("postBlock", {});
-            const response = await communicator.postBlock(stubPeer, genesisBlockJSON);
+            const response = await communicator.postBlock(
+                stubPeer,
+                new Blocks.Block({
+                    data: blocks2to100[0],
+                    transactions: [],
+                }),
+            );
 
             expect(response).toBeObject();
         });
@@ -74,34 +80,6 @@ describe("PeerCommunicator", () => {
             );
 
             expect(response).toBeArray();
-        });
-    });
-
-    describe("downloadBlocks", () => {
-        it("should be ok", async () => {
-            await socketManager.addMock("getBlocks", [genesisBlockJSON, genesisBlockJSON]);
-
-            const blocks = await communicator.downloadBlocks(stubPeer, 1);
-
-            expect(blocks).toBeArray();
-            expect(blocks.length).toBe(2);
-        });
-
-        it("should return the blocks with status 200", async () => {
-            await socketManager.addMock("getBlocks", [genesisBlock]);
-            const response = await communicator.downloadBlocks(stubPeer, 1);
-
-            expect(response).toBeArrayOfSize(1);
-            expect(response[0].id).toBe(genesisBlock.id);
-        });
-
-        it("should update the height after download", async () => {
-            await socketManager.addMock("getBlocks", [genesisBlock]);
-
-            stubPeer.state.height = undefined;
-            await communicator.downloadBlocks(stubPeer, 1);
-
-            expect(stubPeer.state.height).toBe(1);
         });
     });
 
@@ -184,13 +162,31 @@ describe("PeerCommunicator", () => {
 
         it("should return true when peer has common block", async () => {
             await socketManager.resetAllMocks();
-            await socketManager.addMock("getCommonBlocks", { common: genesisBlock });
 
-            const commonBlocks = await communicator.hasCommonBlocks(stubPeer, [genesisBlock.id]);
+            const common = {
+                id: genesisBlock.id,
+                height: genesisBlock.height,
+                previousBlock: genesisBlock.previousBlock,
+                timestamp: genesisBlock.timestamp,
+            };
+            await socketManager.addMock("getCommonBlocks", { common });
 
-            expect(commonBlocks.id).toBe(genesisBlock.id);
-            expect(commonBlocks.height).toBe(genesisBlock.height);
-            expect(commonBlocks.transactions).toHaveLength(255);
+            const commonBlock = await communicator.hasCommonBlocks(stubPeer, [genesisBlock.id]);
+
+            expect(commonBlock).toEqual(common);
+        });
+    });
+
+    describe("when socket is terminated in middleware", () => {
+        it("should disconnect the peer calling internal.p2p.disconnectPeer", async () => {
+            const spyEmit = jest.spyOn(eventEmitter, "emit");
+            await socketManager.addMiddlewareTerminate();
+
+            await communicator.getPeers(stubPeer);
+
+            expect(spyEmit).toHaveBeenCalledWith("internal.p2p.disconnectPeer", expect.anything());
+
+            await socketManager.removeMiddlewareTerminate();
         });
     });
 });

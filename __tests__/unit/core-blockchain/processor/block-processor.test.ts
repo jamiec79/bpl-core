@@ -2,7 +2,7 @@ import "../mocks/";
 import { blockchain } from "../mocks/blockchain";
 import { database } from "../mocks/database";
 
-import { Blocks, Managers, Utils } from "@blockpool-io/crypto";
+import { Blocks, Interfaces, Managers, Utils } from "@blockpool-io/crypto";
 import { BlockProcessor, BlockProcessorResult } from "../../../../packages/core-blockchain/src/processor";
 import * as handlers from "../../../../packages/core-blockchain/src/processor/handlers";
 import {
@@ -20,6 +20,7 @@ let blockProcessor: BlockProcessor;
 
 beforeAll(async () => {
     blockProcessor = new BlockProcessor(blockchain as any);
+    Managers.configManager.setHeight(2); // aip11 (v2 transactions) is true from height 2 on testnet
 });
 
 describe("Block processor", () => {
@@ -44,19 +45,44 @@ describe("Block processor", () => {
 
     describe("getHandler", () => {
         it("should return ExceptionHandler if block is an exception", async () => {
+            Managers.configManager.setFromPreset("mainnet");
             const exceptionBlock = BlockFactory.fromData(blockTemplate);
-            exceptionBlock.data.id = "998877";
-
-            jest.spyOn(Managers.configManager, "get").mockReturnValueOnce(["998877"]);
+            exceptionBlock.data.id = "10370119864814436559";
+            exceptionBlock.transactions = [
+                {
+                    data: {
+                        id: "43223de192d61a341301cc831a325ffe21d3e99666c023749bd4b562652f6796",
+                        blockId: "10370119864814436559",
+                        version: 1,
+                        type: 3,
+                        typeGroup: 1,
+                        amount: Utils.BigNumber.ZERO,
+                        fee: Utils.BigNumber.make("100000000"),
+                        senderPublicKey: "0247b3911ddad3d24314afc621304755b054207abcd0493745d5469d6a986cef54",
+                        recipientId: "AWMYLnbdVtGckhTzF8ZpMLEP3o3a24ZLBM",
+                        signature:
+                            "30440220538d262dc2636d3b78e4f1e903a732051c8082384290796a7b93ddcebb882d1f0220549464b55be0a64516431f25e40b7a45929f7892d8dbca9e0d3d8713b5e05f78",
+                        asset: {
+                            votes: ["+021f277f1e7a48c88f9c02988f06ca63d6f1781471f78dba49d58bab85eb3964c6"],
+                        },
+                        timestamp: 53231063,
+                        nonce: Utils.BigNumber.ONE,
+                    },
+                } as Interfaces.ITransaction,
+            ];
+            exceptionBlock.data.numberOfTransactions = 1;
 
             expect(await blockProcessor.getHandler(exceptionBlock)).toBeInstanceOf(ExceptionHandler);
+            Managers.configManager.setFromPreset("testnet");
         });
 
         it("should return VerificationFailedHandler if block failed verification", async () => {
+            Managers.configManager.setFromPreset("mainnet");
             const failedVerifBlock = BlockFactory.fromData(blockTemplate);
             failedVerifBlock.verification.verified = false;
 
             expect(await blockProcessor.getHandler(failedVerifBlock)).toBeInstanceOf(VerificationFailedHandler);
+            Managers.configManager.setFromPreset("testnet");
         });
     });
 
@@ -274,6 +300,37 @@ describe("Block processor", () => {
                 // if we try to process the block, it should be 'discarded but can be broadcasted'
                 const result = await blockProcessor.process(blockLowerHeight);
                 expect(result).toBe(BlockProcessorResult.DiscardedButCanBeBroadcasted);
+            });
+        });
+
+        describe("Nonce", () => {
+            beforeEach(() => {
+                const lastBlock = BlockFactory.fromData(getBlock([]));
+
+                jest.spyOn(blockchain, "getLastBlock").mockReturnValue(lastBlock);
+            });
+            afterEach(() => {
+                jest.restoreAllMocks();
+            });
+
+            it("should reject a block with invalid nonce order", async () => {
+                const getActiveDelegatesBackup = database.getActiveDelegates;
+                database.getActiveDelegates = jest.fn(() => [delegates[0]]);
+
+                const transactions = TransactionFactory.transfer(delegates[1].address)
+                    .withNetwork("unitnet")
+                    .withPassphrase(delegates[0].passphrase)
+                    .create(2);
+
+                const block = BlockFactory.fromData(getBlock([transactions[1], transactions[0]]));
+                block.verification.verified = true;
+
+                const handler = await blockProcessor.getHandler(block);
+                expect(handler instanceof handlers.NonceOutOfOrderHandler).toBeTrue();
+
+                expect(await handler.execute()).toBe(BlockProcessorResult.Rejected);
+
+                database.getActiveDelegates = getActiveDelegatesBackup;
             });
         });
     });

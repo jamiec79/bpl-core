@@ -1,6 +1,6 @@
-import { start } from "@arkecosystem/exchange-json-rpc";
 import { Container, Logger } from "@blockpool-io/core-interfaces";
 import { Managers } from "@blockpool-io/crypto";
+import { start } from "@arkecosystem/exchange-json-rpc";
 import { defaults } from "./defaults";
 
 export const plugin: Container.IPluginDescriptor = {

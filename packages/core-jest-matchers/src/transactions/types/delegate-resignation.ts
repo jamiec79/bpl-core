@@ -1,5 +1,5 @@
 import { Enums } from "@blockpool-io/crypto";
-const { DelegateResignation } = Enums.TransactionTypes;
+const { DelegateResignation } = Enums.TransactionType;
 
 export {};
 

@@ -1,6 +1,6 @@
 import { Enums } from "@blockpool-io/crypto";
 
-const { MultiSignature } = Enums.TransactionTypes;
+const { MultiSignature } = Enums.TransactionType;
 
 export {};
 

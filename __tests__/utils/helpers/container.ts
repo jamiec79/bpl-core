@@ -40,7 +40,7 @@ export const setUpContainer = async (options: any): Promise<Container.IContainer
     await app.setUp(
         "2.1.1",
         {
-            token: options.token || "bpl",
+            token: options.token || "ark",
             network: options.network,
         },
         options,

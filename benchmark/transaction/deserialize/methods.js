@@ -3,5 +3,5 @@ const {
 } = require('@blockpool-io/crypto')
 
 exports.deserialize = data => {
-    return Transactions.deserializer.deserialize(data)
+    return Transactions.Deserializer.deserialize(data)
 }

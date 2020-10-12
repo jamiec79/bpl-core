@@ -4,7 +4,7 @@ import "./mocks/core-container";
 
 import { ApplicationEvents } from "@blockpool-io/core-event-emitter";
 import { NetworkState, NetworkStateStatus } from "@blockpool-io/core-p2p";
-import { Crypto, Transactions } from "@blockpool-io/crypto";
+import { Crypto, Identities, Interfaces, Transactions, Utils } from "@blockpool-io/crypto";
 import { defaults } from "../../../packages/core-forger/src/defaults";
 import { Delegate } from "../../../packages/core-forger/src/delegate";
 import { ForgerManager } from "../../../packages/core-forger/src/manager";
@@ -12,12 +12,12 @@ import { testnet } from "../../../packages/crypto/src/networks";
 import { TransactionFactory } from "../../helpers/transaction-factory";
 import { sampleBlock } from "./__fixtures__/block";
 import { delegate } from "./__fixtures__/delegate";
-import { sampleTransaction } from "./__fixtures__/transaction";
 
 jest.setTimeout(30000);
 jest.mock("../../../packages/core-forger/src/client");
 
 let forgeManager;
+let mockTransaction: Interfaces.ITransactionData;
 
 afterAll(async () => {
     jest.restoreAllMocks();
@@ -25,6 +25,7 @@ afterAll(async () => {
 
 beforeEach(() => {
     jest.restoreAllMocks();
+    mockTransaction = TransactionFactory.transfer().createOne();
     defaults.hosts = [{ hostname: "127.0.0.1", port: 4000 }];
     forgeManager = new ForgerManager(defaults);
 });
@@ -61,8 +62,10 @@ describe("Forger Manager", () => {
 
             expect(forgeManager.client.broadcastBlock).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    height: round.lastBlock.height + 1,
-                    reward: round.reward.toFixed(),
+                    data: expect.objectContaining({
+                        height: round.lastBlock.height + 1,
+                        reward: Utils.BigNumber.make(round.reward),
+                    }),
                 }),
             );
             expect(forgeManager.client.emitEvent).toHaveBeenCalledWith(
@@ -145,6 +148,21 @@ describe("Forger Manager", () => {
         });
     });
 
+    describe("forger.started", () => {
+        it("should emit forger.started event", async () => {
+            const passphrase = "secret";
+            const manager = new ForgerManager(defaults);
+            (manager as any).client.getRound.mockResolvedValueOnce({ delegates: [] });
+            (manager as any).secrets = [passphrase];
+
+            const publicKey = Identities.PublicKey.fromPassphrase(passphrase);
+            await manager.startForging("", "");
+            expect((manager as any).client.emitEvent).toHaveBeenCalledWith(ApplicationEvents.ForgerStarted, {
+                activeDelegates: [publicKey],
+            });
+        });
+    });
+
     describe("getTransactionsForForging", () => {
         it("should return zero transactions if none to forge", async () => {
             // @ts-ignore
@@ -158,15 +176,15 @@ describe("Forger Manager", () => {
         it("should return deserialized transactions", async () => {
             // @ts-ignore
             forgeManager.client.getTransactions.mockReturnValue({
-                transactions: [Transactions.TransactionFactory.fromData(sampleTransaction).serialized.toString("hex")],
+                transactions: [Transactions.TransactionFactory.fromData(mockTransaction).serialized.toString("hex")],
             });
 
             const transactions = await forgeManager.getTransactionsForForging();
 
             expect(transactions).toHaveLength(1);
             expect(forgeManager.client.getTransactions).toHaveBeenCalled();
-            expect(transactions[0].recipientId).toEqual(sampleTransaction.recipientId);
-            expect(transactions[0].senderPublicKey).toEqual(sampleTransaction.senderPublicKey);
+            expect(transactions[0].recipientId).toEqual(mockTransaction.recipientId);
+            expect(transactions[0].senderPublicKey).toEqual(mockTransaction.senderPublicKey);
         });
     });
 

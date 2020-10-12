@@ -3,15 +3,10 @@ import { isWhitelisted } from "../../utils/is-whitelisted";
 import * as internalHandlers from "./internal";
 import * as peerHandlers from "./peer";
 
-export const isAppReady = (): {
-    transactionPool: boolean;
-    blockchain: boolean;
-    p2p: boolean;
-} => {
+export const isAppReady = (): { ready: boolean } => {
     return {
-        transactionPool: !!app.resolvePlugin("transaction-pool"),
-        blockchain: !!app.resolvePlugin("blockchain"),
-        p2p: !!app.resolvePlugin("p2p"),
+        ready:
+            !!app.resolvePlugin("transaction-pool") && !!app.resolvePlugin("blockchain") && !!app.resolvePlugin("p2p"),
     };
 };
 
@@ -31,5 +26,12 @@ export const isForgerAuthorized = ({ req }): { authorized: boolean } => {
 };
 
 export const getConfig = (): Record<string, any> => {
-    return app.resolveOptions("p2p");
+    const config = app.resolveOptions("p2p");
+
+    // add maxTransactionsPerRequest config from transaction pool
+    config.maxTransactionsPerRequest = app.has("transaction-pool")
+        ? app.resolveOptions("transaction-pool").maxTransactionsPerRequest || 40
+        : 40;
+
+    return config;
 };

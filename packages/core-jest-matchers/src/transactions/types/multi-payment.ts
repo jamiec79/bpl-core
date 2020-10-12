@@ -1,6 +1,6 @@
 import { Enums } from "@blockpool-io/crypto";
 
-const { MultiPayment } = Enums.TransactionTypes;
+const { MultiPayment } = Enums.TransactionType;
 
 export {};
 

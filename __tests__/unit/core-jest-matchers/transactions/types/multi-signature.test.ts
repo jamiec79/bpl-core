@@ -1,12 +1,12 @@
 import "../../../../../packages/core-jest-matchers/src/transactions/types/multi-signature";
 
 import { Enums } from "@blockpool-io/crypto";
-const { TransactionTypes } = Enums;
+const { TransactionType } = Enums;
 
 describe(".toBeMultiSignatureType", () => {
     test("passes when given a valid transaction", () => {
         expect({
-            type: TransactionTypes.MultiSignature,
+            type: TransactionType.MultiSignature,
         }).toBeMultiSignatureType();
     });
 

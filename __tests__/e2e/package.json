@@ -1,7 +1,7 @@
 {
     "name": "e2e-testing",
     "version": "0.1.0",
-    "description": "e2e testing for ARK Core",
+    "description": "e2e testing for BPL Core",
     "license": "MIT",
     "contributors": [
         "Erwann Gentric <erw0nn@gmail.com>"

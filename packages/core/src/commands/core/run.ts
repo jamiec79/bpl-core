@@ -1,6 +1,8 @@
 import { app } from "@blockpool-io/core-container";
 import { flags } from "@oclif/command";
+import deepmerge from "deepmerge";
 import { CommandFlags } from "../../types";
+import { getCliConfig } from "../../utils";
 import { BaseCommand } from "../command";
 
 export class RunCommand extends BaseCommand {
@@ -41,16 +43,21 @@ $ bpl core:run --launchMode=seed
     };
 
     public async run(): Promise<void> {
-        const { flags } = await this.parseWithNetwork(RunCommand);
+        const { flags, paths } = await this.parseWithNetwork(RunCommand);
 
-        await this.buildApplication(app, flags, {
-            options: {
-                "@blockpool-io/core-p2p": this.buildPeerOptions(flags),
-                "@blockpool-io/core-blockchain": {
-                    networkStart: flags.networkStart,
+        await this.buildApplication(
+            app,
+            flags,
+            deepmerge(getCliConfig(flags, paths), {
+                exclude: [],
+                options: {
+                    "@blockpool-io/core-p2p": this.buildPeerOptions(flags),
+                    "@blockpool-io/core-blockchain": {
+                        networkStart: flags.networkStart,
+                    },
+                    "@blockpool-io/core-forger": await this.buildBIP38(flags),
                 },
-                "@blockpool-io/core-forger": await this.buildBIP38(flags),
-            },
-        });
+            }),
+        );
     }
 }

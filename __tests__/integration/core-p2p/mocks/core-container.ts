@@ -1,4 +1,5 @@
 import { Managers } from "@blockpool-io/crypto";
+import { EventEmitter } from "../../../../packages/core-event-emitter/src/emitter";
 import * as plugins from "../../../utils/config/testnet/plugins.js";
 import { blocks2to100 } from "../../../utils/fixtures";
 import { delegates } from "../../../utils/fixtures/testnet/delegates";
@@ -6,6 +7,8 @@ import { genesisBlock } from "../../../utils/fixtures/unitnet/block-model";
 import { defaults } from "./p2p-options";
 
 Managers.configManager.setFromPreset("unitnet");
+
+export const eventEmitter = new EventEmitter();
 
 jest.mock("@blockpool-io/core-container", () => {
     return {
@@ -29,6 +32,9 @@ jest.mock("@blockpool-io/core-container", () => {
                     },
                     getMilestone: () => ({
                         activeDelegates: 51,
+                        block: {
+                            maxTransactions: 500,
+                        },
                     }),
                 };
             },
@@ -68,9 +74,7 @@ jest.mock("@blockpool-io/core-container", () => {
                 }
 
                 if (name === "event-emitter") {
-                    return {
-                        emit: jest.fn(),
-                    };
+                    return eventEmitter;
                 }
 
                 if (name === "blockchain") {
@@ -100,9 +104,6 @@ jest.mock("@blockpool-io/core-container", () => {
                                 throw new Error("The payload contains invalid transaction.");
                             }),
                         }),
-                        options: {
-                            maxTransactionBytes: 10e6,
-                        },
                     };
                 }
 
@@ -113,7 +114,7 @@ jest.mock("@blockpool-io/core-container", () => {
                             getLastBlocks: () => [genesisBlock],
                             getLastHeight: () => genesisBlock.data.height,
                             cacheTransactions: jest.fn().mockImplementation(txs => ({ notAdded: txs, added: [] })),
-                            removeCachedTransactionIds: jest.fn().mockReturnValue(undefined),
+                            clearCachedTransactionIds: jest.fn().mockReturnValue(undefined),
                         }),
                     };
                 }

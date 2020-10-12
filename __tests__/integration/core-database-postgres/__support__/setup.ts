@@ -1,4 +1,5 @@
 import { app } from "@blockpool-io/core-container";
+import { Managers } from "@blockpool-io/crypto";
 import { plugin } from "../../../../packages/core-database-postgres/src/plugin";
 import { plugin as pluginDatabase } from "../../../../packages/core-database/src/plugin";
 import { registerWithContainer, setUpContainer } from "../../../utils/helpers/container";
@@ -13,14 +14,16 @@ export const setUp = async () => {
 
     process.env.CORE_RESET_DATABASE = "1";
 
+    Managers.configManager.getMilestone().aip11 = false;
+
     await registerWithContainer(pluginDatabase);
 
     await registerWithContainer(plugin, {
         connection: {
             host: "localhost",
             port: 5432,
-            database: "ark_unitnet",
-            user: "ark",
+            database: "bpl_unitnet",
+            user: "bpl",
             password: "password",
         },
     });

@@ -1,6 +1,6 @@
 {
     "name": "@blockpool-io/core-webhooks",
-    "version": "2.5.25",
+    "version": "2.6.57",
     "description": "Webhooks for Blockpool Core",
     "license": "MIT",
     "contributors": [
@@ -19,12 +19,12 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@blockpool-io/core-container": "^2.5.25",
-        "@blockpool-io/core-event-emitter": "^2.5.25",
-        "@blockpool-io/core-http-utils": "^2.5.25",
-        "@blockpool-io/core-interfaces": "^2.5.25",
-        "@blockpool-io/core-utils": "^2.5.25",
-        "@hapi/boom": "^7.4.2",
+        "@blockpool-io/core-container": "^2.6.57",
+        "@blockpool-io/core-event-emitter": "^2.6.57",
+        "@blockpool-io/core-http-utils": "^2.6.57",
+        "@blockpool-io/core-interfaces": "^2.6.57",
+        "@blockpool-io/core-utils": "^2.6.57",
+        "@hapi/boom": "^8.0.0",
         "@hapi/joi": "^15.1.0",
         "fs-extra": "^8.1.0",
         "lowdb": "^1.0.0",
@@ -41,6 +41,5 @@
     },
     "publishConfig": {
         "access": "public"
-    },
-    "gitHead": "1eb2e9238d9d18aa1c79514c88bf85e524b68256"
+    }
 }

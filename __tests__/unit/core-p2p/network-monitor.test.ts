@@ -4,16 +4,21 @@ import "./mocks/core-container";
 
 import { blockchain } from "./mocks/blockchain";
 
+import { Delegate } from "@blockpool-io/core-forger";
 import { P2P } from "@blockpool-io/core-interfaces";
-import { Blocks, Transactions } from "@blockpool-io/crypto";
+import { Networks, Utils } from "@blockpool-io/crypto";
 import { NetworkState } from "../../../packages/core-p2p/src/network-state";
 import { createPeerService, createStubPeer, stubPeer } from "../../helpers/peers";
+import { TransactionFactory } from "../../helpers/transaction-factory";
 import { genesisBlock } from "../../utils/config/unitnet/genesisBlock";
+import { delegates } from "../../utils/fixtures/unitnet";
 
 let monitor: P2P.INetworkMonitor;
 let processor: P2P.IPeerProcessor;
 let storage: P2P.IPeerStorage;
 let communicator: P2P.IPeerCommunicator;
+
+jest.setTimeout(60000);
 
 beforeEach(() => {
     jest.resetAllMocks();
@@ -84,6 +89,8 @@ describe("NetworkMonitor", () => {
 
             validateAndAcceptPeer.mockReset();
 
+            communicator.getPeers = jest.fn().mockReturnValue([{ ip: "1.1.1.1" }]);
+
             await expect(monitor.discoverPeers()).resolves.toBeFalse();
 
             expect(validateAndAcceptPeer).not.toHaveBeenCalled();
@@ -149,9 +156,7 @@ describe("NetworkMonitor", () => {
             const mockPeers = [];
             for (let i = 0; i < 100; i++) {
                 mockPeers.push({ ip: `3.3.3.${i + 1}` });
-                mockPeers.push({ ip: `3.3.${i + 1}.3` });
-                mockPeers.push({ ip: `3.${i + 1}.3.3` });
-                mockPeers.push({ ip: `${i + 1}.3.3.3` });
+                mockPeers.push({ ip: `3.3.3.${i + 101}` });
             }
 
             communicator.getPeers = jest.fn().mockReturnValue(mockPeers);
@@ -217,7 +222,28 @@ describe("NetworkMonitor", () => {
         });
     });
 
-    describe("syncWithNetwork", () => {
+    describe("downloadBlocksFromHeight", () => {
+        const downloadChunkSize = 400;
+        const maxParallelDownloads = 25;
+
+        const throwInDownloadAtHeight = 50000;
+
+        const expectedBlocksFromHeight = height => {
+            const blocks = [];
+            for (let i = 0; i < maxParallelDownloads * downloadChunkSize; i++) {
+                blocks.push({ height: height + 1 + i });
+            }
+            return blocks;
+        };
+
+        const mockedGetPeerBlocks = (peer, { fromBlockHeight }) => {
+            if (fromBlockHeight + 1 === throwInDownloadAtHeight) {
+                throw new Error(`Cannot download blocks, deliberate error`);
+            }
+
+            return expectedBlocksFromHeight(fromBlockHeight).slice(0, downloadChunkSize);
+        };
+
         it("should download blocks from 1 peer", async () => {
             const mockBlock = { id: "123456" };
 
@@ -236,15 +262,13 @@ describe("NetworkMonitor", () => {
                 }),
             );
 
-            expect(await monitor.syncWithNetwork(1)).toEqual([mockBlock]);
+            expect(await monitor.downloadBlocksFromHeight(1, maxParallelDownloads)).toEqual([mockBlock]);
         });
 
-        it("should download blocks in parallel from 25 peers max", async () => {
-            communicator.getPeerBlocks = jest
-                .fn()
-                .mockImplementation((peer, { fromBlockHeight }) => [{ id: `11${fromBlockHeight}` }]);
+        it("should download blocks in parallel from N peers max", async () => {
+            communicator.getPeerBlocks = jest.fn().mockImplementation(mockedGetPeerBlocks);
 
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < maxParallelDownloads + 5; i++) {
                 storage.setPeer(
                     createStubPeer({
                         ip: `1.1.1.${i}`,
@@ -259,19 +283,20 @@ describe("NetworkMonitor", () => {
                 );
             }
 
-            const expectedBlocks = [];
-            for (let i = 0; i < 25; i++) {
-                expectedBlocks.push({ id: `11${1 + i * 400}` });
-            }
-            expect(await monitor.syncWithNetwork(1)).toEqual(expectedBlocks);
+            const fromHeight = 1;
+
+            const downloadedBlocks = await monitor.downloadBlocksFromHeight(fromHeight, maxParallelDownloads);
+            const expectedBlocks = expectedBlocksFromHeight(fromHeight);
+
+            expect(downloadedBlocks).toEqual(expectedBlocks);
         });
 
-        it("should download blocks in parallel from all peers if less than 25 peers", async () => {
-            communicator.getPeerBlocks = jest
-                .fn()
-                .mockImplementation((peer, { fromBlockHeight }) => [{ id: `11${fromBlockHeight}` }]);
+        it("should download blocks in parallel from all peers if less than N peers", async () => {
+            communicator.getPeerBlocks = jest.fn().mockImplementation(mockedGetPeerBlocks);
 
-            for (let i = 0; i < 18; i++) {
+            const numPeers = maxParallelDownloads - 7;
+
+            for (let i = 0; i < numPeers; i++) {
                 storage.setPeer(
                     createStubPeer({
                         ip: `1.1.1.${i}`,
@@ -286,25 +311,27 @@ describe("NetworkMonitor", () => {
                 );
             }
 
-            const expectedBlocks = [];
-            for (let i = 0; i < 18; i++) {
-                expectedBlocks.push({ id: `11${1 + i * 400}` });
-            }
-            expect(await monitor.syncWithNetwork(1)).toEqual(expectedBlocks);
+            const fromHeight = 1;
+
+            const downloadedBlocks = await monitor.downloadBlocksFromHeight(fromHeight, maxParallelDownloads);
+            const expectedBlocks = expectedBlocksFromHeight(fromHeight).slice(0, numPeers * downloadChunkSize);
+
+            expect(downloadedBlocks).toEqual(expectedBlocks);
         });
 
-        it("should download blocks in parallel until median network height and no more", async () => {
-            communicator.getPeerBlocks = jest
-                .fn()
-                .mockImplementation((peer, { fromBlockHeight }) => [{ id: `11${fromBlockHeight}` }]);
+        it("should handle when getPeerBlocks throws", async () => {
+            const mockFn = jest.fn().mockImplementation(mockedGetPeerBlocks);
+            communicator.getPeerBlocks = mockFn;
 
-            for (let i = 0; i < 30; i++) {
+            const numPeers = 5;
+
+            for (let i = 0; i < numPeers; i++) {
                 storage.setPeer(
                     createStubPeer({
                         ip: `1.1.1.${i}`,
                         port: 4000,
                         state: {
-                            height: 1250,
+                            height: throwInDownloadAtHeight + numPeers * downloadChunkSize,
                             currentSlot: 2,
                             forgingAllowed: true,
                         },
@@ -313,39 +340,42 @@ describe("NetworkMonitor", () => {
                 );
             }
 
-            const expectedBlocks = [];
-            for (let i = 0; i < 4; i++) {
-                expectedBlocks.push({ id: `11${1 + i * 400}` });
+            const chunksToDownloadBeforeThrow = 2;
+            let fromHeight = throwInDownloadAtHeight - 1 - chunksToDownloadBeforeThrow * downloadChunkSize;
+
+            let downloadedBlocks = await monitor.downloadBlocksFromHeight(fromHeight, maxParallelDownloads);
+            let expectedBlocks = expectedBlocksFromHeight(fromHeight).slice(
+                0,
+                chunksToDownloadBeforeThrow * downloadChunkSize,
+            );
+
+            expect(downloadedBlocks).toEqual(expectedBlocks);
+
+            expect(mockFn.mock.calls.length).toEqual(numPeers);
+            for (let i = 0; i < numPeers; i++) {
+                expect(mockFn.mock.calls[i][1].fromBlockHeight).toEqual(fromHeight + i * downloadChunkSize);
             }
-            expect(await monitor.syncWithNetwork(1)).toEqual(expectedBlocks);
-        });
 
-        it("should handle when getPeerBlocks throws (can be peer timeout or wrong response)", async () => {
-            communicator.getPeerBlocks = jest
-                .fn()
-                .mockRejectedValueOnce("peer mock error")
-                .mockImplementation((peer, { fromBlockHeight }) => [{ id: `11${fromBlockHeight}` }]);
+            // See that the downloaded higher 2 chunks would be returned from the cache.
 
-            for (let i = 0; i < 5; i++) {
-                storage.setPeer(
-                    createStubPeer({
-                        ip: `1.1.1.${i}`,
-                        port: 4000,
-                        state: {
-                            height: 12500,
-                            currentSlot: 2,
-                            forgingAllowed: true,
-                        },
-                        verificationResult: { forked: false },
-                    }),
+            mockFn.mock.calls = [];
+
+            fromHeight = throwInDownloadAtHeight - 1 + downloadChunkSize;
+
+            downloadedBlocks = await monitor.downloadBlocksFromHeight(fromHeight, maxParallelDownloads);
+            expectedBlocks = expectedBlocksFromHeight(fromHeight).slice(0, numPeers * downloadChunkSize);
+
+            expect(downloadedBlocks).toEqual(expectedBlocks);
+
+            const numFailedChunks = 1;
+            const numCachedChunks = numPeers - chunksToDownloadBeforeThrow - numFailedChunks;
+
+            expect(mockFn.mock.calls.length).toEqual(numPeers - numCachedChunks);
+            for (let i = 0; i < numPeers - numCachedChunks; i++) {
+                expect(mockFn.mock.calls[i][1].fromBlockHeight).toEqual(
+                    fromHeight + (i + numCachedChunks) * downloadChunkSize,
                 );
             }
-
-            const expectedBlocks = [];
-            for (let i = 0; i < 5; i++) {
-                expectedBlocks.push({ id: `11${1 + i * 400}` });
-            }
-            expect(await monitor.syncWithNetwork(1)).toEqual(expectedBlocks);
         });
 
         it("should still download blocks from 1 peer if network height === our height", async () => {
@@ -366,7 +396,63 @@ describe("NetworkMonitor", () => {
                 }),
             );
 
-            expect(await monitor.syncWithNetwork(20)).toEqual([mockBlock]);
+            expect(await monitor.downloadBlocksFromHeight(20, maxParallelDownloads)).toEqual([mockBlock]);
+        });
+
+        it("should reduce download block chunk size after receiving no block", async () => {
+            communicator.getPeerBlocks = jest.fn().mockReturnValue([]);
+
+            const numPeers = maxParallelDownloads;
+            for (let i = 0; i < maxParallelDownloads; i++) {
+                storage.setPeer(
+                    createStubPeer({
+                        ip: `1.1.1.${i}`,
+                        port: 4000,
+                        state: {
+                            height: 12500,
+                            currentSlot: 2,
+                            forgingAllowed: true,
+                        },
+                        verificationResult: { forked: false },
+                    }),
+                );
+            }
+
+            const fromHeight = 1;
+
+            // first step, peers won't return any block: chunk size should be reduced by factor 10 for next download
+            for (const expectedBlockLimit of [400, 40, 4, 1, 1, 1]) {
+                // @ts-ignore
+                communicator.getPeerBlocks.mockReset();
+                const downloadedBlocks = await monitor.downloadBlocksFromHeight(fromHeight, maxParallelDownloads);
+
+                expect(downloadedBlocks).toEqual([]);
+                expect(communicator.getPeerBlocks).toBeCalledTimes(maxParallelDownloads);
+                expect(communicator.getPeerBlocks).toBeCalledWith(expect.anything(), {
+                    fromBlockHeight: expect.any(Number),
+                    blockLimit: expectedBlockLimit,
+                });
+            }
+
+            // second step, peers return blocks: chunk size should be reset to default value (400) for next download
+            const mockGetPeerBlocks1Block = (_, { fromBlockHeight }) => [expectedBlocksFromHeight(fromBlockHeight)[0]];
+            for (const expectedBlockLimit of [1, 400]) {
+                communicator.getPeerBlocks = jest
+                    .fn()
+                    .mockImplementation(expectedBlockLimit === 1 ? mockGetPeerBlocks1Block : mockedGetPeerBlocks);
+
+                const downloadedBlocks = await monitor.downloadBlocksFromHeight(fromHeight, maxParallelDownloads);
+
+                const expectedBlocks = expectedBlocksFromHeight(fromHeight).slice(0, numPeers * expectedBlockLimit);
+
+                expect(downloadedBlocks).toEqual(expectedBlocks);
+
+                expect(communicator.getPeerBlocks).toBeCalledTimes(maxParallelDownloads);
+                expect(communicator.getPeerBlocks).toBeCalledWith(expect.anything(), {
+                    fromBlockHeight: expect.any(Number),
+                    blockLimit: expectedBlockLimit,
+                });
+            }
         });
     });
 
@@ -374,20 +460,34 @@ describe("NetworkMonitor", () => {
         it("should broadcast the block to peers", async () => {
             storage.setPeer(stubPeer);
 
+            global.Math.random = () => 0.5;
+
+            const delegate = new Delegate(delegates[0].passphrase, Networks.unitnet.network);
+            const transactions = TransactionFactory.transfer()
+                .withPassphrase(delegates[0].passphrase)
+                .create(10);
+
+            const block = delegate.forge(transactions, {
+                timestamp: 12345689,
+                previousBlock: {
+                    id: genesisBlock.id,
+                    height: 1,
+                },
+                reward: Utils.BigNumber.ZERO,
+            });
+
+            communicator.postBlock = jest.fn();
+
             blockchain.getBlockPing = jest.fn().mockReturnValue({
                 block: {
-                    id: genesisBlock.id,
+                    id: block.data.id,
                 },
                 last: 1110,
                 first: 800,
                 count: 1,
             });
 
-            global.Math.random = () => 0.5;
-
-            communicator.postBlock = jest.fn();
-
-            await monitor.broadcastBlock(Blocks.BlockFactory.fromData(genesisBlock));
+            await monitor.broadcastBlock(block);
 
             expect(communicator.postBlock).toHaveBeenCalled();
         });
@@ -399,9 +499,7 @@ describe("NetworkMonitor", () => {
 
             communicator.postTransactions = jest.fn();
 
-            await monitor.broadcastTransactions([
-                Transactions.TransactionFactory.fromData(genesisBlock.transactions[0]),
-            ]);
+            await monitor.broadcastTransactions(TransactionFactory.transfer().build());
 
             expect(communicator.postTransactions).toHaveBeenCalled();
         });

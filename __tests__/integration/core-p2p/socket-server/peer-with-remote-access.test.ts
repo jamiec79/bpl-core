@@ -18,7 +18,7 @@ let emit;
 
 const headers = {
     version: "2.1.0",
-    port: "4009",
+    port: 4009,
     height: 1,
     "Content-Type": "application/json",
 };
@@ -56,6 +56,7 @@ describe("Peer socket endpoint", () => {
             for (let i = 0; i < 300; i++) {
                 const { data } = await emit("p2p.peer.getStatus", {
                     headers,
+                    data: {},
                 });
                 expect(data.state.height).toBeNumber();
             }

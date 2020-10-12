@@ -1,7 +1,14 @@
 module.exports = {
     "@blockpool-io/core-event-emitter": {},
     "@blockpool-io/core-logger-pino": {},
+    "@blockpool-io/core-p2p": {
+        server: {
+            port: process.env.CORE_P2P_PORT || 20930,
+        },
+        minimumNetworkReach: 5,
+    },
     "@blockpool-io/core-state": {},
+    "@blockpool-io/core-magistrate-transactions": {},
     "@blockpool-io/core-database-postgres": {
         connection: {
             host: process.env.CORE_DB_HOST || "localhost",
@@ -16,9 +23,9 @@ module.exports = {
         maxTransactionsPerSender: process.env.CORE_TRANSACTION_POOL_MAX_PER_SENDER || 300,
         allowedSenders: [],
         dynamicFees: {
-            enabled: false,
-            minFeePool: 3000,
-            minFeeBroadcast: 3000,
+            enabled: true,
+            minFeePool: 1000,
+            minFeeBroadcast: 1000,
             addonBytes: {
                 transfer: 100,
                 secondSignature: 250,
@@ -29,6 +36,15 @@ module.exports = {
                 timelockTransfer: 500,
                 multiPayment: 500,
                 delegateResignation: 100,
+                htlcLock: 100,
+                htlcClaim: 0,
+                htlcRefund: 0,
+                businessRegistration: 4000000,
+                businessUpdate: 500,
+                businessResignation: 100,
+                bridgechainRegistration: 4000000,
+                bridgechainUpdate: 500,
+                bridgechainResignation: 100,
             },
         },
     },
