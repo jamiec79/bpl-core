@@ -15,6 +15,6 @@ sed -i '/core-database-postgres/i "@blockpool-io/core-magistrate-transactions": 
 cd ~/bpl-core
 git reset --hard
 git pull
-git checkout master
+git checkout bpl_mainnet
 yarn run bootstrap
 yarn run upgrade
