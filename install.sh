@@ -228,7 +228,7 @@ echo 'export PATH=$(yarn global bin):$PATH' >> ~/.bashrc
 export PATH=$(yarn global bin):$PATH
 ln -s $(pwd)/bpl-core/packages/core/bin/run $(yarn global bin)/bpl || echo "Link already exists."
 
-bpl config:publish
+$(yarn global bin)/bpl config:publish
 
 success "Installed BPL Core!"
 
@@ -257,9 +257,9 @@ if [[ "$choice" =~ ^(yes|y|Y) ]]; then
         read -p "Proceed? [y/N]: " choice
     done
 
-    bpl env:set CORE_DB_USERNAME "${databaseUsername}"
-    bpl env:set CORE_DB_PASSWORD "${databasePassword}"
-    bpl env:set CORE_DB_DATABASE "${databaseName}"
+    $(yarn global bin)/bpl env:set CORE_DB_USERNAME "${databaseUsername}"
+    $(yarn global bin)/bpl env:set CORE_DB_PASSWORD "${databasePassword}"
+    $(yarn global bin)/bpl env:set CORE_DB_DATABASE "${databaseName}"
 
     userExists=$(sudo -i -u postgres psql -tAc "SELECT 1 FROM pg_user WHERE usename = '${databaseUsername}'")
     databaseExists=$(sudo -i -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname = '${databaseName}'")
