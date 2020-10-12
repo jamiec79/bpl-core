@@ -222,9 +222,12 @@ while ! yarn setup:clean ; do
         exit 1
     fi
 done
+cd ..
 
 echo 'export PATH=$(yarn global bin):$PATH' >> ~/.bashrc
 export PATH=$(yarn global bin):$PATH
+ln -s $(pwd)/packages/core/bin/runbpl $(yarn global bin)
+
 bpl config:publish
 
 success "Installed BPL Core!"
