@@ -226,7 +226,7 @@ cd ..
 
 echo 'export PATH=$(yarn global bin):$PATH' >> ~/.bashrc
 export PATH=$(yarn global bin):$PATH
-ln -s $(pwd)/packages/core/bin/run $(yarn global bin)/bpl || echo "Link already exists."
+ln -s $(pwd)/bpl-core/packages/core/bin/run $(yarn global bin)/bpl || echo "Link already exists."
 
 bpl config:publish
 
