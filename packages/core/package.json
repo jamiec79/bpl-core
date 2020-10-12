@@ -128,7 +128,7 @@
                 "./dist/hooks/command_not_found/suggest"
             ]
         },
-        "bin": "ark",
+        "bin": "bpl",
         "topics": {
             "config": {
                 "description": "manage core config variables"
