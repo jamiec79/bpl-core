@@ -209,7 +209,7 @@ success "Installed system updates!"
 
 heading "Installing BPL Core..."
 
-yarn global remove @blockpool-io/core
+# yarn global remove @blockpool-io/core
 cd ~
 if [ -f bpl-core ]; then
     mv bpl-core bpl-core-bak
